@@ -10,7 +10,6 @@ namespace PKHeX
         {
             InitializeComponent();
             Util.TranslateInterface(this, Main.curlanguage);
-            sav = (byte[])Main.SAV.Data.Clone();
 
             item_val = getItems(Main.SAV.ORAS ? Legal.Pouch_Items_ORAS : Legal.Pouch_Items_XY);
             keyitem_val = getItems(Main.SAV.ORAS ? Legal.Pouch_Key_ORAS : Legal.Pouch_Key_XY);
@@ -29,8 +28,9 @@ namespace PKHeX
             B_DisplayBerries.Text = Main.itempouch[3];
             B_DisplayKeyItems.Text = Main.itempouch[4];
         }
-        public byte[] sav;
-        public string[] item_val, keyitem_val, tmhm_val, medicine_val, berries_val;
+
+        private readonly byte[] sav = (byte[])Main.SAV.Data.Clone();
+        private readonly string[] item_val, keyitem_val, tmhm_val, medicine_val, berries_val;
 
 
         // Initialize String Tables
@@ -184,7 +184,8 @@ namespace PKHeX
             // Store Current Items back to the save file
             saveBag(sender);
             populateList(keyitem_val, Main.SAV.Items.KeyItem);
-            if (ModifierKeys == Keys.Alt && Util.Prompt(MessageBoxButtons.YesNo, String.Format("Warning: Adding all {0} is dangerous.", B_DisplayKeyItems.Text), "Continue?") == DialogResult.Yes)
+            if (ModifierKeys == Keys.Alt && Util.Prompt(MessageBoxButtons.YesNo,
+                $"Warning: Adding all {B_DisplayKeyItems.Text} is dangerous.", "Continue?") == DialogResult.Yes)
                 giveAll(keyitem_val, 1);
         }
         private void B_DisplayTMHM_Click(object sender, EventArgs e)
@@ -192,7 +193,8 @@ namespace PKHeX
             // Store Current Items back to the save file
             saveBag(sender);
             populateList(tmhm_val, Main.SAV.Items.TMHM);
-            if (ModifierKeys == Keys.Alt && Util.Prompt(MessageBoxButtons.YesNo, String.Format("Warning: Adding all {0} is dangerous.", B_DisplayTMHM.Text), "Continue?") == DialogResult.Yes)
+            if (ModifierKeys == Keys.Alt && Util.Prompt(MessageBoxButtons.YesNo,
+                $"Warning: Adding all {B_DisplayTMHM.Text} is dangerous.", "Continue?") == DialogResult.Yes)
                 giveAll(tmhm_val, 1);
         }
         private void B_DisplayMedicine_Click(object sender, EventArgs e)

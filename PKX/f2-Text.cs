@@ -8,7 +8,6 @@ namespace PKHeX
     {
         public f2_Text(TextBox TB_NN)
         {
-            Main.specialChars = true;
             Hide();
             InitializeComponent();
             Util.TranslateInterface(this, Main.curlanguage);
@@ -37,16 +36,13 @@ namespace PKHeX
             CenterToParent();
             Show();
         }
-        TextBox TB_Nickname;
+
+        readonly TextBox TB_Nickname;
         private void onClick(object sender, EventArgs e)
         {
             string nickname = TB_Nickname.Text;
             if (nickname.Length < TB_Nickname.MaxLength)
                 TB_Nickname.Text += (sender as Label).Text;
-        }
-        private void onClosed(object sender, FormClosedEventArgs e)
-        {
-            Main.specialChars = false;
         }
     }
 }

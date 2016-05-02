@@ -13,7 +13,7 @@
 !
 ! -----------------------------------------------------
 - DO NOT CHANGE THIS SECTION. Main Form (PKHeX window) below.
-! Main = PKHeX: Unleashed Edition
+! Main = PKHeX
 - Change stuff below this line, not above.
 ---------------------Menu Strip------------------------
 Menu_File = File
@@ -22,18 +22,15 @@ Menu_Save = Save PK6...
 Menu_ExportSAV = Export SAV...
 Menu_ExportMAIN = Export main
 Menu_ExportBAK = Export BAK
-Menu_ExportRAMSAV = Export ramsav
-Menu_ExportTransfer = Transfer ramsav
 Menu_Exit = Quit
 --
 Menu_Tools = Tools
 Menu_Showdown = Showdown
 Menu_ShowdownImportPK6 = Import Set from Clipboard
-Menu_ShowdownExportPK6 = Export Set from Clipboard
+Menu_ShowdownExportPK6 = Export Set to Clipboard
 Menu_ShowdownExportParty = Export Party to Clipboard
 Menu_ShowdownExportBattleBox = Export Battle Box to Clipboard
 Menu_CyberGadget = CyberGadget
-Menu_CodeGenerator = Code Generator
 Menu_OpenTemp = Open Temp Folder
 Menu_OpenCache = Open Cache Folder
 Menu_Data = Data
@@ -50,8 +47,13 @@ Menu_Language = Language
 Menu_Modify = Set to SAV
 Menu_ModifyDex = Modify Pokédex
 Menu_ModifyPK6 = Modify PK6 Info
-Menu_Unicode = Toggle Font
-Menu_About = About PKHeX: Unleashed Edition
+Menu_Unicode = Unicode
+Menu_About = About PKHeX
+--------------------Context Menus----------------------
+mnuView = View
+mnuSet = Set
+mnuDelete = Delete
+mnu2View = View
 --------------------Main Tab Data----------------------
 Tab_Main = Main
 Label_PID = PID:
@@ -498,7 +500,7 @@ CHK_L4 = Italian
 CHK_L5 = German
 CHK_L6 = Spanish
 CHK_L7 = Korean
-B_FillDex = Fill Dex
+B_Modify = Modify...
 B_GiveAll = Check All
 L_Spinda = Spinda:
 B_Save = Save
@@ -531,7 +533,7 @@ CHK_L4 = Italian
 CHK_L5 = German
 CHK_L6 = Spanish
 CHK_L7 = Korean
-B_FillDex = Fill Dex
+B_Modify = Modify...
 B_GiveAll = Check All
 L_Spinda = Spinda:
 B_Save = Save
@@ -674,16 +676,17 @@ L_PPUps = PPUps
 ! SAV_Trainer = Trainer Data Editor
 - Change stuff below this line, not above.
 -------------------------------------------------------
-GB_Misc = Misc
+Tab_Multiplayer = Multiplayer
 L_MultiplayerSprite = Multiplayer Sprite:
 L_Style = Style:
+Tab_BadgeMap = Badges/Map
 GB_Map = Map Position
-L_Y = Y Coordinate:
 L_CurrentMap = Current Map:
-L_Z = Z Coordinate:
 L_X = X Coordinate:
+L_Z = Z Coordinate:
+L_Y = Y Coordinate:
 L_Offset = (offset)
-GB_Appear = Current Appearance (X/Y)
+Tab_Appearance = Current Appearance (X/Y)
 L_Outfit = Outfit Vals
 B_GiveAccessories = Give All Accessories
 L_Dress = Dress:
@@ -706,7 +709,7 @@ L_TriplesC = Triples:
 L_DoublesC = Doubles:
 L_SinglesC = Singles:
 GB_MaisonBest = Maison Streaks (Best)
-GB_SuperB = Super
+L_SuperB = Super
 L_NormalB = Normal
 L_MultiB = Multi:
 L_RotationB = Rotation:
@@ -716,7 +719,7 @@ L_SinglesB = Singles:
 B_Save = Save
 L_Stats = Stats
 B_Cancel = Cancel
-GB_Overview = Overview
+Tab_Overview = Overview
 L_Seconds = Sec:
 L_Minutes = Min:
 L_Hours = Hrs:
@@ -738,15 +741,6 @@ L_Saying2 = 2:
 L_Saying3 = 3:
 L_Saying4 = 4:
 L_Saying5 = 5:
-GB_Badges = Badges
-cb1 = 1 - Bug
-cb2 = 2 - Cliff
-cb3 = 3 - Rumble
-cb4 = 4 - Plant
-cb5 = 5 - Voltage
-cb6 = 6 - Fairy
-cb7 = 7 - Psychic
-cb8 = 8 - Iceberg
 ! End
 ! -----------------------------------------------------
 - DO NOT CHANGE THIS SECTION.

@@ -7,8 +7,8 @@ namespace PKHeX
 {
     public class PK6 : PKX
     {
-        internal static readonly int SIZE_PARTY = 0x104;
-        internal static readonly int SIZE_STORED = 0xE8;
+        internal const int SIZE_PARTY = 0x104;
+        internal const int SIZE_STORED = 0xE8;
 
         public PK6(byte[] decryptedData = null, string ident = null)
         {
@@ -288,7 +288,7 @@ namespace PKHeX
         public int IV_SPA { get { return (int)(IV32 >> 20) & 0x1F; } set { IV32 = (uint)((IV32 & ~(0x1F << 20)) | (uint)((value > 31 ? 31 : value) << 20)); } }
         public int IV_SPD { get { return (int)(IV32 >> 25) & 0x1F; } set { IV32 = (uint)((IV32 & ~(0x1F << 25)) | (uint)((value > 31 ? 31 : value) << 25)); } }
         public bool IsEgg { get { return ((IV32 >> 30) & 1) == 1; } set { IV32 = (uint)((IV32 & ~0x40000000) | (uint)(value ? 0x40000000 : 0)); } }
-        public bool IsNicknamed { get { return ((IV32 >> 31) & 1) == 1; } set { IV32 = ((IV32 & 0x7FFFFFFF) | (value ? 0x80000000 : 0)); } }
+        public bool IsNicknamed { get { return ((IV32 >> 31) & 1) == 1; } set { IV32 = (IV32 & 0x7FFFFFFF) | (value ? 0x80000000 : 0); } }
         #endregion
         #region Block C
         public string HT_Name
@@ -416,19 +416,24 @@ namespace PKHeX
             set { if (value == null || value.Length != 6) return;
                   IV_HP = value[0];  IV_ATK = value[1]; IV_DEF = value[2];
                   IV_SPE = value[3]; IV_SPA = value[4]; IV_SPD = value[5]; } }
-        public int[] EVs { get { return new[] { EV_HP, EV_ATK, EV_DEF, EV_SPE, EV_SPA, EV_SPD }; } }
-        public int PSV { get { return (int)((PID >> 16 ^ PID & 0xFFFF) >> 4); } }
-        public int TSV { get { return (TID ^ SID) >> 4; } }
-        public bool IsShiny { get { return TSV == PSV; } }
-        public bool PKRS_Infected { get { return PKRS_Strain > 0; } }
-        public bool PKRS_Cured { get { return PKRS_Days == 0 && PKRS_Strain > 0; } }
-        public bool IsUntraded { get { return string.IsNullOrEmpty(HT_Name); } }
-        public bool IsUntradedEvent6 { get { return Geo1_Country == 0 && Geo1_Region == 0 && Met_Location / 10000 == 4 && Gen6; } }
-        public bool Gen6 { get { return Version >= 24 && Version <= 29; } }
-        public bool Gen5 { get { return Version >= 20 && Version <= 23; } }
-        public bool Gen4 { get { return Version >= 10 && Version < 12 || Version >= 7 && Version <= 8; } }
-        public bool Gen3 { get { return Version >= 1 && Version <= 5 || Version == 15; } }
-        public bool GenU { get { return !(Gen6 || Gen5 || Gen4 || Gen3); } }
+        public int[] EVs => new[] { EV_HP, EV_ATK, EV_DEF, EV_SPE, EV_SPA, EV_SPD };
+        public int[] CNTs => new[] { CNT_Cool, CNT_Beauty, CNT_Cute, CNT_Smart, CNT_Tough, CNT_Sheen };
+        public int PSV => (int)((PID >> 16 ^ PID & 0xFFFF) >> 4);
+        public int TSV => (TID ^ SID) >> 4;
+        public bool IsShiny => TSV == PSV;
+        public bool PKRS_Infected => PKRS_Strain > 0;
+        public bool PKRS_Cured => PKRS_Days == 0 && PKRS_Strain > 0;
+        public bool IsUntraded => string.IsNullOrWhiteSpace(HT_Name);
+        public bool IsUntradedEvent6 => Geo1_Country == 0 && Geo1_Region == 0 && Met_Location / 10000 == 4 && Gen6;
+        public bool Gen6 => Version >= 24 && Version <= 29;
+        public bool XY => Version == (int)GameVersion.X || Version == (int)GameVersion.Y;
+        public bool AO => Version == (int)GameVersion.AS || Version == (int)GameVersion.OR;
+        public bool SM => Version == (int)GameVersion.SN || Version == (int)GameVersion.MN;
+        public bool Gen5 => Version >= 20 && Version <= 23;
+        public bool Gen4 => Version >= 7 && Version <= 12 && Version != 9;
+        public bool Gen3 => Version >= 1 && Version <= 5 || Version == 15;
+        public bool GenU => !(Gen6 || Gen5 || Gen4 || Gen3);
+
         public int[] Moves
         {
             get { return new[] { Move1, Move2, Move3, Move4 }; }
@@ -440,14 +445,31 @@ namespace PKHeX
                 if (value.Length > 3) Move4 = value[3];
             }
         }
+        public int[] RelearnMoves
+        {
+            get { return new[] { RelearnMove1, RelearnMove2, RelearnMove3, RelearnMove4 }; }
+            set
+            {
+                if (value.Length > 0) RelearnMove1 = value[0];
+                if (value.Length > 1) RelearnMove2 = value[1];
+                if (value.Length > 2) RelearnMove3 = value[2];
+                if (value.Length > 3) RelearnMove4 = value[3];
+            }
+        }
+        public int CurrentLevel => getLevel(Species, EXP);
 
         // Complex Generated Attributes
-        public Image Sprite { get { return getSprite(this); } }
-        public string ShowdownText { get { return getShowdownText(this); } }
-        public string[] QRText { get { return getQRText(this); } }
+        public Image Sprite => getSprite(this);
+        public string ShowdownText => getShowdownText(this);
+        public string[] QRText => getQRText(this);
+        public byte[] EncryptedPartyData => Encrypt().Take(SIZE_PARTY).ToArray();
+        public byte[] EncryptedBoxData => Encrypt().Take(SIZE_STORED).ToArray();
+        public byte[] DecryptedPartyData => Data.Take(SIZE_PARTY).ToArray();
+        public byte[] DecryptedBoxData => Data.Take(SIZE_STORED).ToArray();
+
         public int HPType
         {
-            get { return (15 * ((IV_HP & 1) + 2 * (IV_ATK & 1) + 4 * (IV_DEF & 1) + 8 * (IV_SPE & 1) + 16 * (IV_SPA & 1) + 32 * (IV_SPD & 1))) / 63; }
+            get { return 15 * ((IV_HP & 1) + 2 * (IV_ATK & 1) + 4 * (IV_DEF & 1) + 8 * (IV_SPE & 1) + 16 * (IV_SPA & 1) + 32 * (IV_SPD & 1)) / 63; }
             set
             {
                 IV_HP = (IV_HP & ~1) + hpivs[value, 0];
@@ -468,11 +490,8 @@ namespace PKHeX
                 int pm6stat = 0;
 
                 for (int i = 0; i < 6; i++)
-                {
-                    pm6stat = (pm6 + i) % 6;
-                    if (IVs[pm6stat] == maxIV)
-                        break; // P%6 is this stat
-                }
+                    if (IVs[pm6stat = pm6++ % 6] == maxIV)
+                        break;
                 return pm6stat*5 + maxIV%5;
             }
         }
@@ -488,7 +507,8 @@ namespace PKHeX
                 return ivTotal <= 150 ? 2 : 3;
             }
         }
-        public string FileName { get { return getFileName(this); } }
+        public string FileName => getFileName(this);
+        public bool ChecksumValid => Checksum == CalculateChecksum();
 
         // Methods
         public void RefreshChecksum()
@@ -527,44 +547,56 @@ namespace PKHeX
         // General User-error Fixes
         public void FixMoves()
         {
-            if (Move4 != 0 && Move3 == 0)
+            while (true)
             {
-                Move3 = Move4;
-                Move3_PP = Move4_PP;
-                Move3_PPUps = Move4_PPUps;
-                Move4 = Move4_PP = Move4_PPUps = 0;
-            }
-            if (Move3 != 0 && Move2 == 0)
-            {
-                Move2 = Move3;
-                Move2_PP = Move3_PP;
-                Move2_PPUps = Move3_PPUps;
-                Move3 = Move3_PP = Move3_PPUps = 0;
-            }
-            if (Move2 != 0 && Move1 == 0)
-            {
-                Move1 = Move2;
-                Move1_PP = Move2_PP;
-                Move1_PPUps = Move2_PPUps;
-                Move2 = Move2_PP = Move2_PPUps = 0;
+                if (Move4 != 0 && Move3 == 0)
+                {
+                    Move3 = Move4;
+                    Move3_PP = Move4_PP;
+                    Move3_PPUps = Move4_PPUps;
+                    Move4 = Move4_PP = Move4_PPUps = 0;
+                }
+                if (Move3 != 0 && Move2 == 0)
+                {
+                    Move2 = Move3;
+                    Move2_PP = Move3_PP;
+                    Move2_PPUps = Move3_PPUps;
+                    Move3 = Move3_PP = Move3_PPUps = 0;
+                    continue;
+                }
+                if (Move2 != 0 && Move1 == 0)
+                {
+                    Move1 = Move2;
+                    Move1_PP = Move2_PP;
+                    Move1_PPUps = Move2_PPUps;
+                    Move2 = Move2_PP = Move2_PPUps = 0;
+                    continue;
+                }
+                break;
             }
         }
         public void FixRelearn()
         {
-            if (RelearnMove4 != 0 && RelearnMove3 == 0)
+            while (true)
             {
-                RelearnMove3 = RelearnMove4;
-                RelearnMove4 = 0;
-            }
-            if (RelearnMove3 != 0 && RelearnMove2 == 0)
-            {
-                RelearnMove2 = RelearnMove3;
-                RelearnMove3 = 0;
-            }
-            if (RelearnMove2 != 0 && RelearnMove1 == 0)
-            {
-                RelearnMove1 = RelearnMove2;
-                RelearnMove2 = 0;
+                if (RelearnMove4 != 0 && RelearnMove3 == 0)
+                {
+                    RelearnMove3 = RelearnMove4;
+                    RelearnMove4 = 0;
+                }
+                if (RelearnMove3 != 0 && RelearnMove2 == 0)
+                {
+                    RelearnMove2 = RelearnMove3;
+                    RelearnMove3 = 0;
+                    continue;
+                }
+                if (RelearnMove2 != 0 && RelearnMove1 == 0)
+                {
+                    RelearnMove1 = RelearnMove2;
+                    RelearnMove2 = 0;
+                    continue;
+                }
+                break;
             }
         }
         public void FixMemories()
@@ -583,6 +615,8 @@ namespace PKHeX
             
             if (IsUntraded)
                 HT_Friendship = HT_Affection = HT_TextVar = HT_Memory = HT_Intensity = HT_Feeling = 0;
+            if (!Gen6)
+                OT_Affection = OT_TextVar = OT_Memory = OT_Intensity = OT_Feeling = 0;
 
             Geo1_Region = Geo1_Country > 0 ? Geo1_Region : 0;
             Geo2_Region = Geo2_Country > 0 ? Geo2_Region : 0;
@@ -590,35 +624,43 @@ namespace PKHeX
             Geo4_Region = Geo4_Country > 0 ? Geo4_Region : 0;
             Geo5_Region = Geo5_Country > 0 ? Geo5_Region : 0;
 
-            if (Geo5_Country != 0 && Geo4_Country == 0)
+            while (true)
             {
-                Geo4_Country = Geo5_Country;
-                Geo4_Region = Geo5_Region;
-                Geo5_Country = Geo5_Region = 0;
-            }
-            if (Geo4_Country != 0 && Geo3_Country == 0)
-            {
-                Geo3_Country = Geo4_Country;
-                Geo3_Region = Geo4_Region;
-                Geo4_Country = Geo4_Region = 0;
-            }
-            if (Geo3_Country != 0 && Geo2_Country == 0)
-            {
-                Geo2_Country = Geo3_Country;
-                Geo2_Region = Geo3_Region;
-                Geo3_Country = Geo3_Region = 0;
-            }
-            if (Geo2_Country != 0 && Geo1_Country == 0)
-            {
-                Geo1_Country = Geo2_Country;
-                Geo1_Region = Geo2_Region;
-                Geo2_Country = Geo2_Region = 0;
-            }
-            if (Geo1_Country == 0 && !IsUntraded && !IsUntradedEvent6)
-            {
-                // Traded Non-Eggs/Events need to have a current location.
-                Geo1_Country = Country;
-                Geo1_Region = Region;
+                if (Geo5_Country != 0 && Geo4_Country == 0)
+                {
+                    Geo4_Country = Geo5_Country;
+                    Geo4_Region = Geo5_Region;
+                    Geo5_Country = Geo5_Region = 0;
+                }
+                if (Geo4_Country != 0 && Geo3_Country == 0)
+                {
+                    Geo3_Country = Geo4_Country;
+                    Geo3_Region = Geo4_Region;
+                    Geo4_Country = Geo4_Region = 0;
+                    continue;
+                }
+                if (Geo3_Country != 0 && Geo2_Country == 0)
+                {
+                    Geo2_Country = Geo3_Country;
+                    Geo2_Region = Geo3_Region;
+                    Geo3_Country = Geo3_Region = 0;
+                    continue;
+                }
+                if (Geo2_Country != 0 && Geo1_Country == 0)
+                {
+                    Geo1_Country = Geo2_Country;
+                    Geo1_Region = Geo2_Region;
+                    Geo2_Country = Geo2_Region = 0;
+                    continue;
+                }
+                if (Geo1_Country == 0 && !IsUntraded && !IsUntradedEvent6)
+                {
+                    // Traded Non-Eggs/Events need to have a current location.
+                    Geo1_Country = Country;
+                    Geo1_Region = Region;
+                    continue;
+                }
+                break;
             }
         }
 
@@ -660,7 +702,7 @@ namespace PKHeX
         // Misc Updates
         private void UpdateEgg(int Day, int Month, int Year)
         {
-            Egg_Location = 30002;
+            Met_Location = 30002;
             Egg_Day = Day;
             Egg_Month = Month;
             Egg_Year = Year - 2000;
@@ -684,15 +726,15 @@ namespace PKHeX
             Geo2_Country = Geo1_Country;
             Geo2_Region = Geo1_Region;
 
-            Geo1_Country = Country;
-            Geo1_Region = Region;
+            Geo1_Country = GeoCountry;
+            Geo1_Region = GeoRegion;
         }
         public void TradeMemory(bool Bank)
         {
             HT_Memory = 4; // Link trade to [VAR: General Location]
             HT_TextVar = Bank ? 0 : 9; // Somewhere (Bank) : Pokécenter (Trade)
             HT_Intensity = 1;
-            HT_Feeling = Util.rand.Next(0, 9);
+            HT_Feeling = Util.rand.Next(0, Bank ? 9 : 19); // 0-9 Bank, 0-19 Trade
         }
         public void TradeFriendshipAffection(string SAV_TRAINER)
         {
@@ -704,5 +746,13 @@ namespace PKHeX
             HT_Friendship = getBaseFriendship(Species);
             HT_Affection = 0;
         }
+
+        // Legality Properties
+        public bool WasLink => Met_Location == 30011;
+        public bool WasEgg => Legal.EggLocations.Contains(Egg_Location);
+        public bool WasEvent => Met_Location > 40000 && Met_Location < 50000;
+        public bool WasEventEgg => ((Egg_Location > 40000 && Egg_Location < 50000) || (FatefulEncounter && Egg_Location == 30002)) && Met_Level == 1;
+        public bool WasTradedEgg => Egg_Location == 30002;
+        public bool WasIngameTrade => Met_Location == 30001;
     }
 }

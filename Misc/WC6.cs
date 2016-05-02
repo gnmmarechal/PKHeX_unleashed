@@ -4,23 +4,33 @@ using System.Text;
 
 namespace PKHeX
 {
-    public class WC6
+    public partial class WC6
     {
-        internal static int Size = 0x108;
+        internal const int Size = 0x108;
+        internal const int SizeFull = 0x310;
+        internal const uint EonTicketConst = 0x225D73C2;
 
-        public byte[] Data;
+        public readonly byte[] Data;
         public WC6(byte[] data = null)
         {
             Data = data ?? new byte[Size];
+            if (Data.Length == SizeFull)
+            {
+                Data = Data.Skip(SizeFull - Size).ToArray();
+                DateTime now = DateTime.Now;
+                Year = (uint)(now.Year - 2000);
+                Month = (uint)now.Month;
+                Day = (uint)now.Day;
+            }
         }
 
         // General Card Properties
         public int CardID {
             get { return BitConverter.ToUInt16(Data, 0); }
             set { BitConverter.GetBytes((ushort)value).CopyTo(Data, 0); } }
-        public string CardTitle {
-            get { return Encoding.Unicode.GetString(Data, 2, 64).Trim(); }
-            set { Encoding.Unicode.GetBytes(value.PadRight(32, '\0')).CopyTo(Data, 2); } }
+        public string CardTitle { // Max len 36 char, followed by null terminator
+            get { return Util.TrimFromZero(Encoding.Unicode.GetString(Data, 2, 72)); }
+            set { Encoding.Unicode.GetBytes(value.PadRight(36, '\0')).CopyTo(Data, 2); } }
         private uint Date { 
             get { return BitConverter.ToUInt32(Data, 0x4C); } 
             set { BitConverter.GetBytes(value).CopyTo(Data, 0x4C); } }
@@ -167,8 +177,9 @@ namespace PKHeX
         public bool RIB1_7 { get { return (RIB1 & (1 << 7)) == 1 << 7; } set { RIB1 = (byte)(RIB1 & ~(1 << 7) | (value ? 1 << 7 : 0)); } } // Empty
 
         // Meta Accessible Properties
-        public int[] IVs { get { return new[] { IV_HP, IV_ATK, IV_DEF, IV_SPE, IV_SPA, IV_SPD }; } }
-        public bool IsNicknamed { get { return Nickname.Length > 0; } }
+        public int[] IVs => new[] { IV_HP, IV_ATK, IV_DEF, IV_SPE, IV_SPA, IV_SPD };
+        public bool IsNicknamed => Nickname.Length > 0;
+
         public int[] Moves
         {
             get { return new[] {Move1, Move2, Move3, Move4}; }
@@ -223,9 +234,6 @@ namespace PKHeX
                 RelearnMove1 = RelearnMove1, RelearnMove2 = RelearnMove2,
                 RelearnMove3 = RelearnMove3, RelearnMove4 = RelearnMove4,
                 Met_Location = MetLocation,
-                Met_Day = (int)Day,
-                Met_Month = (int)Month,
-                Met_Year = (int)Year - 2000,
                 Egg_Location = EggLocation,
                 CNT_Cool = CNT_Cool,
                 CNT_Beauty = CNT_Beauty,
@@ -264,6 +272,21 @@ namespace PKHeX
                 OT_Friendship = PKX.getBaseFriendship(Species),
                 FatefulEncounter = true,
             };
+
+            if (Day + Month + Year == 0) // No datetime set, typical for wc6full
+            {
+                DateTime dt = DateTime.Now;
+                pk.Met_Day = dt.Day;
+                pk.Met_Month = dt.Month;
+                pk.Met_Year = dt.Year - 2000;
+            }
+            else
+            {
+                pk.Met_Day = (int)Day;
+                pk.Met_Month = (int)Month;
+                pk.Met_Year = (int)(Year - 2000);
+            }
+
             if (pk.CurrentHandler == 0) // OT
             {
                 pk.OT_Memory = 3;

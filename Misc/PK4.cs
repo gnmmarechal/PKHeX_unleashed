@@ -5,9 +5,9 @@ namespace PKHeX
 {
     public class PK4 // 4th Generation PKM File
     {
-        internal static readonly int SIZE_PARTY = 236;
-        internal static readonly int SIZE_STORED = 136;
-        internal static readonly int SIZE_BLOCK = 32;
+        internal const int SIZE_PARTY = 236;
+        internal const int SIZE_STORED = 136;
+        internal const int SIZE_BLOCK = 32;
 
         public PK4(byte[] decryptedData = null, string ident = null)
         {
@@ -114,7 +114,7 @@ namespace PKHeX
         public int IV_SPA { get { return (int)(IV32 >> 20) & 0x1F; } set { IV32 = (uint)((IV32 & ~(0x1F << 20)) | (uint)((value > 31 ? 31 : value) << 20)); } }
         public int IV_SPD { get { return (int)(IV32 >> 25) & 0x1F; } set { IV32 = (uint)((IV32 & ~(0x1F << 25)) | (uint)((value > 31 ? 31 : value) << 25)); } }
         public bool IsEgg { get { return ((IV32 >> 30) & 1) == 1; } set { IV32 = (uint)((IV32 & ~0x40000000) | (uint)(value ? 0x40000000 : 0)); } }
-        public bool IsNicknamed { get { return ((IV32 >> 31) & 1) == 1; } set { IV32 = ((IV32 & 0x7FFFFFFF) | (value ? 0x80000000 : 0)); } }
+        public bool IsNicknamed { get { return ((IV32 >> 31) & 1) == 1; } set { IV32 = (IV32 & 0x7FFFFFFF) | (value ? 0x80000000 : 0); } }
 
         private byte RIB4 { get { return Data[0x3C]; } set { Data[0x3C] = value; } } // Hoenn 1a
         public bool RIB4_0 { get { return (RIB4 & (1 << 0)) == 1 << 0; } set { RIB4 = (byte)(RIB4 & ~(1 << 0) | (value ? 1 << 0 : 0)); } } //	Cool Ribbon
@@ -156,9 +156,6 @@ namespace PKHeX
         public bool FatefulEncounter { get { return (Data[0x40] & 1) == 1; } set { Data[0x40] = (byte)(Data[0x40] & ~0x01 | (value ? 1 : 0)); } }
         public int Gender { get { return (Data[0x40] >> 1) & 0x3; } set { Data[0x40] = (byte)(Data[0x40] & ~0x06 | (value << 1)); } }
         public int AltForm { get { return Data[0x40] >> 3; } set { Data[0x40] = (byte)(Data[0x40] & 0x07 | (value << 3)); } }
-        public int Nature { get { return Data[0x41]; } set { Data[0x41] = (byte)value; } }
-        public bool HiddenAbility { get { return (Data[0x41] & 1) == 1; } set { Data[0x41] = (byte)(Data[0x41] & ~0x01 | (value ? 1 : 0)); } }
-        public bool NPokémon { get { return (Data[0x41] & 2) == 2; } set { Data[0x41] = (byte)(Data[0x41] & ~0x02 | (value ? 2 : 0)); } }
         // 0x43-0x47 Unused
         #endregion
 
@@ -275,15 +272,16 @@ namespace PKHeX
                 IV_SPE = value[3]; IV_SPA = value[4]; IV_SPD = value[5];
             }
         }
-        public int[] EVs { get { return new[] { EV_HP, EV_ATK, EV_DEF, EV_SPE, EV_SPA, EV_SPD }; } }
-        public int PSV { get { return (int)((PID >> 16 ^ PID & 0xFFFF) >> 3); } }
-        public int TSV { get { return (TID ^ SID) >> 3; } }
-        public bool IsShiny { get { return TSV == PSV; } }
-        public bool PKRS_Infected { get { return PKRS_Strain > 0; } }
-        public bool PKRS_Cured { get { return PKRS_Days == 0 && PKRS_Strain > 0; } }
-        public bool Gen4 { get { return Version >= 10 && Version < 12 || Version >= 7 && Version <= 8; } }
-        public bool Gen3 { get { return Version >= 1 && Version <= 5 || Version == 15; } }
-        public bool GenU { get { return !(Gen4 || Gen3); } }
+        public int[] EVs => new[] { EV_HP, EV_ATK, EV_DEF, EV_SPE, EV_SPA, EV_SPD };
+        public int PSV => (int)((PID >> 16 ^ PID & 0xFFFF) >> 3);
+        public int TSV => (TID ^ SID) >> 3;
+        public bool IsShiny => TSV == PSV;
+        public bool PKRS_Infected => PKRS_Strain > 0;
+        public bool PKRS_Cured => PKRS_Days == 0 && PKRS_Strain > 0;
+        public bool Gen4 => Version >= 10 && Version < 12 || Version >= 7 && Version <= 8;
+        public bool Gen3 => Version >= 1 && Version <= 5 || Version == 15;
+        public bool GenU => !(Gen4 || Gen3);
+
         public int[] Moves
         {
             get { return new[] { Move1, Move2, Move3, Move4 }; }
@@ -420,7 +418,7 @@ namespace PKHeX
 
             // Met / Crown Data Detection
             pk5.Met_Location = pk5.FatefulEncounter && Array.IndexOf(new[] {251, 243, 244, 245}, pk5.Species) >= 0
-                ? ((pk5.Species == 251) ? 30010 : 30012) // Celebi : Beast
+                ? (pk5.Species == 251 ? 30010 : 30012) // Celebi : Beast
                 : 30001; // Pokétransfer (not Crown)
             
             // Delete HGSS Data

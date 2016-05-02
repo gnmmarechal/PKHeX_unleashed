@@ -32,17 +32,16 @@ namespace PKHeX
             };
 
             // Enable Scrolling when hovered over
-            var me = this;
-            PAN_Box.MouseEnter += (sender, args) =>
+            PAN_Box.MouseHover += (sender, args) =>
             {
-                if (ActiveForm == me)
+                if (ActiveForm == this)
                     SCR_Box.Focus();
             };
             foreach (var slot in PKXBOXES)
             {
                 slot.MouseEnter += (sender, args) =>
                 {
-                    if (ActiveForm == me)
+                    if (ActiveForm == this)
                         SCR_Box.Focus();
                 };
                 // Enable Click
@@ -88,7 +87,7 @@ namespace PKHeX
             // Load databases
             foreach (string file in Directory.GetFiles(DatabasePath, "*", SearchOption.AllDirectories))
             {
-                if ((new FileInfo(file)).Extension == ".pk6")
+                if (new FileInfo(file).Extension == ".pk6")
                     Database[0].Slot.Add(new PK6(File.ReadAllBytes(file), file));
                 else
                     loadDatabase(File.ReadAllBytes(file));
@@ -99,47 +98,49 @@ namespace PKHeX
 
             // Prepare Database
             prepareDBForSearch();
+            Menu_SearchSettings.DropDown.Closing += (sender, e) =>
+            {
+                if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
+                    e.Cancel = true;
+            };
+            CenterToParent();
         }
-        private Main m_parent;
-        private PictureBox[] PKXBOXES;
-        private string DatabasePath = Main.DatabasePath;
-        private List<DatabaseList> Database = new List<DatabaseList>();
+        private readonly Main m_parent;
+        private readonly PictureBox[] PKXBOXES;
+        private readonly string DatabasePath = Main.DatabasePath;
+        private readonly List<DatabaseList> Database = new List<DatabaseList>();
         private List<PK6> Results;
         private List<PK6> RawDB;
         private int slotSelected = -1; // = null;
         private Image slotColor;
         private const int RES_MAX = 66;
         private const int RES_MIN = 6;
-        private string Counter;
-        private string Viewed;
+        private readonly string Counter;
+        private readonly string Viewed;
 
         // Important Events
         private void clickView(object sender, EventArgs e)
         {
-            string name = sender is ToolStripItem
-                ? ((sender as ToolStripItem).Owner as ContextMenuStrip).SourceControl.Name
-                : (sender as PictureBox).Name;
+            sender = ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl ?? sender as PictureBox;
+            int index = Array.IndexOf(PKXBOXES, sender);
 
-            int index = Array.FindIndex(PKXBOXES, p => p.Name == name);
             var dataArr = Results.Skip(SCR_Box.Value * RES_MIN).Take(RES_MAX).ToArray();
             if (index >= dataArr.Length)
                 System.Media.SystemSounds.Exclamation.Play();
             else
             {
-                m_parent.populateFields(dataArr[index].Data, false);
+                m_parent.populateFields(new PK6(dataArr[index].Data), false);
                 slotSelected = index + SCR_Box.Value * RES_MIN;
                 slotColor = Properties.Resources.slotView;
                 FillPKXBoxes(SCR_Box.Value);
-                L_Viewed.Text = String.Format(Viewed, dataArr[index].Identifier);
+                L_Viewed.Text = string.Format(Viewed, dataArr[index].Identifier);
             }
         }
         private void clickDelete(object sender, EventArgs e)
         {
-            string name = sender is ToolStripItem
-                ? ((sender as ToolStripItem).Owner as ContextMenuStrip).SourceControl.Name
-                : (sender as PictureBox).Name;
+            sender = ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl ?? sender as PictureBox;
+            int index = Array.IndexOf(PKXBOXES, sender);
 
-            int index = Array.FindIndex(PKXBOXES, p => p.Name == name);
             var dataArr = Results.Skip(SCR_Box.Value * RES_MIN).Take(RES_MAX).ToArray();
             if (index >= dataArr.Length)
                 System.Media.SystemSounds.Exclamation.Play();
@@ -178,7 +179,7 @@ namespace PKHeX
                 RawDB.Remove(pk);
                 Results.Remove(pk);
                 // Refresh database view.
-                L_Count.Text = String.Format(Counter, Results.Count);
+                L_Count.Text = string.Format(Counter, Results.Count);
                 slotSelected = -1;
                 FillPKXBoxes(SCR_Box.Value);
                 System.Media.SystemSounds.Asterisk.Play();
@@ -190,7 +191,7 @@ namespace PKHeX
             if (!m_parent.verifiedPKX())
                 return;
 
-            PK6 pk = new PK6(m_parent.preparepkx());
+            PK6 pk = m_parent.preparepkx();
             if (!Directory.Exists(DatabasePath))
                 Directory.CreateDirectory(DatabasePath);
 
@@ -214,7 +215,7 @@ namespace PKHeX
             Results.Add(pk);
 
             // Refresh database view.
-            L_Count.Text = String.Format(Counter, Results.Count);
+            L_Count.Text = string.Format(Counter, Results.Count);
             slotSelected = Results.Count - 1;
             slotColor = Properties.Resources.slotSet;
             if ((SCR_Box.Maximum+1)*6 < Results.Count)
@@ -298,10 +299,13 @@ namespace PKHeX
             CB_Generation.SelectedIndex = 0;
 
             MT_ESV.Visible = L_ESV.Visible = false;
+
+            if (sender != null)
+                System.Media.SystemSounds.Asterisk.Play();
         }
         private void generateDBReport(object sender, EventArgs e)
         {
-            if (Util.Prompt(MessageBoxButtons.YesNoCancel, "Generate a Report on all data?", "This may take a while...")
+            if (Util.Prompt(MessageBoxButtons.YesNo, "Generate a Report on all data?", "This may take a while...")
                 != DialogResult.Yes)
                 return;
 
@@ -313,10 +317,10 @@ namespace PKHeX
         // IO Usage
         private class DatabaseList
         {
-            public List<PK6> Slot = new List<PK6>();
+            public readonly List<PK6> Slot = new List<PK6>();
             public int Version;
-            private bool Unicode;
-            public byte[] Unused;
+            private readonly bool Unicode;
+            private readonly byte[] Unused;
             public string Title;
             public string Description;
 
@@ -381,7 +385,7 @@ namespace PKHeX
             foreach (var db in Database)
                 RawDB.AddRange(db.Slot);
 
-            RawDB = new List<PK6>(RawDB.Where(pk => pk.Checksum == pk.CalculateChecksum() && pk.Species != 0 && pk.Sanity == 0));
+            RawDB = new List<PK6>(RawDB.Where(pk => pk.ChecksumValid && pk.Species != 0 && pk.Sanity == 0));
             RawDB = new List<PK6>(RawDB.Distinct());
             setResults(RawDB);
         }
@@ -528,6 +532,12 @@ namespace PKHeX
                 res = res.Where(pk => !pk.Identifier.Contains("db\\"));
 
             slotSelected = -1; // reset the slot last viewed
+            
+            if (Menu_SearchLegal.Checked && !Menu_SearchIllegal.Checked) // Legal Only
+                res = res.Where(pk => pk.Gen6 && new LegalityAnalysis(pk).Valid);
+            if (!Menu_SearchLegal.Checked && Menu_SearchIllegal.Checked) // Illegal Only
+                res = res.Where(pk => pk.Gen6 && !new LegalityAnalysis(pk).Valid);
+
             var results = res.ToArray();
             if (results.Length == 0)
             {
@@ -554,14 +564,14 @@ namespace PKHeX
             SCR_Box.Value = 0;
             FillPKXBoxes(0);
 
-            L_Count.Text = String.Format(Counter, Results.Count);
+            L_Count.Text = string.Format(Counter, Results.Count);
         }
         private void FillPKXBoxes(int start)
         {
             if (Results == null)
                 for (int i = 0; i < RES_MAX; i++)
                     PKXBOXES[i].Image = null;
-            PK6[] data = (Results).Skip(start * RES_MIN).Take(RES_MAX).ToArray();
+            PK6[] data = Results.Skip(start * RES_MIN).Take(RES_MAX).ToArray();
             for (int i = 0; i < data.Length; i++)
                 PKXBOXES[i].Image = data[i].Sprite;
             for (int i = data.Length; i < RES_MAX; i++)
@@ -604,26 +614,35 @@ namespace PKHeX
             if (!result[0].Any())
                 return;
 
-            var any = result[0][0].Data;
+            var any = result[0][0];
             m_parent.populateFields(any);
         }
         private void testUnique()
         {
             var query = from db in Database
-                        select db.Slot.GroupBy(p => (p.Checksum + p.EncryptionConstant + p.Species)) // Unique criteria
+                        select db.Slot.GroupBy(p => p.Checksum + p.EncryptionConstant + p.Species) // Unique criteria
                         .Select(grp => grp.First()).ToArray();
 
             var result = query.ToArray();
             if (!result[0].Any())
                 return;
 
-            var any = result[0][0].Data;
+            var any = result[0][0];
             m_parent.populateFields(any);
         }
 
         private void Menu_Exit_Click(object sender, EventArgs e)
         {
             Close();
+        }
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            if (!PAN_Box.RectangleToScreen(PAN_Box.ClientRectangle).Contains(MousePosition))
+                return;
+            int oldval = SCR_Box.Value;
+            int newval = oldval + (e.Delta < 0 ? 1 : -1);
+            if (newval >= SCR_Box.Minimum && SCR_Box.Maximum >= newval)
+                FillPKXBoxes(SCR_Box.Value = newval);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace PKHeX
 {
     public partial class SAV_Trainer : Form
     {
-        private SAV6 SAV = new SAV6(Main.SAV.Data);
+        private readonly SAV6 SAV = new SAV6(Main.SAV.Data);
         public SAV_Trainer()
         {
             InitializeComponent();
@@ -25,21 +25,22 @@ namespace PKHeX
                 TB_MCRN,TB_MCRS,TB_MBRN,TB_MBRS,
                 TB_MCMN,TB_MCMS,TB_MBMN,TB_MBMS,
             };
-            if (Main.SAV.ORAS || Main.SAV.ORASDEMO)
-            {
-                Width = (int)((float)Width * 428 / 590);
-                CB_Multi.Enabled = true;
-                L_MultiplayerSprite.Enabled = true; // Multiplayer Sprite Label
+            cba = new[] { CHK_Badge1, CHK_Badge2, CHK_Badge3, CHK_Badge4, CHK_Badge5, CHK_Badge6, CHK_Badge7, CHK_Badge8, };
+            pba = new [] { PB_Badge1, PB_Badge2, PB_Badge3, PB_Badge4, PB_Badge5, PB_Badge6, PB_Badge7, PB_Badge8, };
 
-                L_Style.Visible = false; // Style Label
-                TB_Style.Visible = false;
-                GB_Appear.Visible = false;
-            }
+            L_MultiplayerSprite.Enabled = CB_MultiplayerSprite.Enabled = Main.SAV.ORAS;
+            L_Style.Visible = TB_Style.Visible = SAV.XY;
+            if (!SAV.XY)
+                TC_Editor.TabPages.Remove(Tab_Appearance);
+            if (SAV.ORASDEMO)
+                TC_Editor.TabPages.Remove(Tab_Multiplayer);
+            if (SAV.MaisonStats < 0)
+                TC_Editor.TabPages.Remove(Tab_Maison);
+
             editing = true;
             getComboBoxes();
             getTextBoxes();
             getBadges();
-            GB_Map.Enabled = Main.ramsav == null;
 
             statdata = new[] {
                 "0x000",	"0x000", // Steps taken?
@@ -200,11 +201,12 @@ namespace PKHeX
                 CB_Stats.Items.Add(statdata[2 * i + 1]);
             CB_Stats.SelectedIndex = 0;
         }
-        private string[] statdata = { };
-        public bool editing;
-        public ToolTip Tip1 = new ToolTip();
-        public ToolTip Tip2 = new ToolTip();
-        private MaskedTextBox[] MaisonRecords;
+        private readonly string[] statdata;
+        private bool editing;
+        private readonly ToolTip Tip1 = new ToolTip(), Tip2 = new ToolTip();
+        private readonly MaskedTextBox[] MaisonRecords;
+        private readonly CheckBox[] cba;
+        private readonly PictureBox[] pba;
 
         private void getComboBoxes()
         {
@@ -319,9 +321,9 @@ namespace PKHeX
                 new { Text = "Gift",                        Value = 0x81 },
             };
 
-            CB_Multi.DisplayMember = "Text";
-            CB_Multi.ValueMember = "Value";
-            CB_Multi.DataSource = oras_sprite_list;
+            CB_MultiplayerSprite.DisplayMember = "Text";
+            CB_MultiplayerSprite.ValueMember = "Value";
+            CB_MultiplayerSprite.DataSource = oras_sprite_list;
 
             L_Vivillon.Text = Main.specieslist[666] + ":";
             Main.setForms(666, CB_Vivillon);
@@ -329,7 +331,7 @@ namespace PKHeX
         private void getBadges()
         {
             // Fetch Badges
-            Bitmap[] bma = Main.SAV.ORAS || Main.SAV.ORASDEMO ? 
+            Bitmap[] bma = Main.SAV.ORAS ? 
                 new[] {
                                    Properties.Resources.badge_01, // ORAS Badges
                                    Properties.Resources.badge_02,  
@@ -350,16 +352,13 @@ namespace PKHeX
                                    Properties.Resources.badge_7, 
                                    Properties.Resources.badge_8,
                 };
-            CheckBox[] cba = { cb1, cb2, cb3, cb4, cb5, cb6, cb7, cb8, };
-            PictureBox[] pba = { pb1, pb2, pb3, pb4, pb5, pb6, pb7, pb8, };
 
             for (int i = 0; i < 8; i++)
-                pba[i].Image = Util.ChangeOpacity(bma[i], !cba[i].Checked ? 0.1 : 1);
+                pba[i].Image = Util.ChangeOpacity(bma[i], cba[i].Checked ? 1 : 0.1);
         }
         private void getTextBoxes()
         {
             int badgeval = SAV.Badges;
-            CheckBox[] cba = { cb1, cb2, cb3, cb4, cb5, cb6, cb7, cb8, };
             for (int i = 0; i < 8; i++)
                 cba[i].Checked = (badgeval & 1 << i) != 0;
 
@@ -388,20 +387,25 @@ namespace PKHeX
             CB_Language.SelectedValue = SAV.Language;
 
             // Maison Data
-            for (int i = 0; i < MaisonRecords.Length; i++)
-                MaisonRecords[i].Text = SAV.getMaisonStat(i).ToString();
+            if (SAV.MaisonStats > -1)
+                for (int i = 0; i < MaisonRecords.Length; i++)
+                    MaisonRecords[i].Text = SAV.getMaisonStat(i).ToString();
 
             NUD_M.Value = SAV.M;
-            NUD_X.Value = (decimal)SAV.X;
-            NUD_Z.Value = (decimal)SAV.Z;
-            NUD_Y.Value = (decimal)SAV.Y;
+            // Sanity Check Map Coordinates
+            if (!GB_Map.Enabled || SAV.X%0.5 != 0 || SAV.Z%0.5 != 0 || SAV.Y%0.5 != 0)
+                GB_Map.Enabled = false;
+            else try
+            {
+                NUD_X.Value = (decimal)SAV.X;
+                NUD_Z.Value = (decimal)SAV.Z;
+                NUD_Y.Value = (decimal)SAV.Y;
+            }
+            catch { GB_Map.Enabled = false; }
 
             // Load BP and PokeMiles
             TB_BP.Text = SAV.BP.ToString();
             TB_PM.Text = SAV.getPSSStat(0xFC/4).ToString();
-
-            // Temp ORAS
-            GB_Misc.Visible = true;
 
             TB_Style.Text = SAV.Style.ToString();
 
@@ -411,7 +415,7 @@ namespace PKHeX
             MT_Seconds.Text = Main.SAV.PlayedSeconds.ToString();
 
             // Load PSS Sprite
-            CB_Multi.SelectedValue = SAV.Sprite;
+            CB_MultiplayerSprite.SelectedValue = SAV.Sprite;
             PB_Sprite.Image = (Image)Properties.Resources.ResourceManager.GetObject("tr_" + SAV.Sprite.ToString("00"));
             
             if (SAV.XY)
@@ -440,6 +444,10 @@ namespace PKHeX
             }
 
             CB_Vivillon.SelectedIndex = SAV.Vivillon;
+            CAL_LastSavedDate.Value = new DateTime(SAV.LastSavedYear, SAV.LastSavedMonth, SAV.LastSavedDay);
+            CAL_LastSavedTime.Value = new DateTime(2000, 1, 1, SAV.LastSavedHour, SAV.LastSavedMinute, 0);
+            CAL_AdventureStartDate.Value = new DateTime(2000, 1, 1).AddSeconds(SAV.SecondsToStart);
+            CAL_AdventureStartTime.Value = new DateTime(2000, 1, 1).AddSeconds(SAV.SecondsToStart % 86400);
         }
         private void save()
         {
@@ -449,10 +457,10 @@ namespace PKHeX
             SAV.TID = (ushort)Util.ToUInt32(MT_TID.Text);
             SAV.SID = (ushort)Util.ToUInt32(MT_SID.Text);
             SAV.Money = Util.ToUInt32(MT_Money.Text);
-            SAV.SubRegion = Util.ToInt32(CB_Region.SelectedValue.ToString());
-            SAV.Country = Util.ToInt32(CB_Country.SelectedValue.ToString());
-            SAV.ConsoleRegion = Util.ToInt32(CB_3DSReg.SelectedValue.ToString());
-            SAV.Language = Util.ToInt32(CB_Language.SelectedValue.ToString());
+            SAV.SubRegion = Util.getIndex(CB_Region);
+            SAV.Country = Util.getIndex(CB_Country);
+            SAV.ConsoleRegion = Util.getIndex(CB_3DSReg);
+            SAV.Language = Util.getIndex(CB_Language);
 
             SAV.OT = TB_OTName.Text;
 
@@ -463,68 +471,87 @@ namespace PKHeX
             SAV.Saying5 = TB_Saying5.Text;
 
             // Copy Maison Data in
-            for (int i = 0; i < MaisonRecords.Length; i++)
-                SAV.setMaisonStat(i, UInt16.Parse(MaisonRecords[i].Text));
+            if (SAV.MaisonStats > -1)
+                for (int i = 0; i < MaisonRecords.Length; i++)
+                    SAV.setMaisonStat(i, ushort.Parse(MaisonRecords[i].Text));
 
             // Copy Position
-            SAV.M = (int)NUD_M.Value;
-            SAV.X = (float)NUD_X.Value;
-            SAV.Z = (float)NUD_Z.Value;
-            SAV.Y = (float)NUD_Y.Value;
+            if (GB_Map.Enabled)
+            {
+                SAV.M = (int)NUD_M.Value;
+                SAV.X = (float)NUD_X.Value;
+                SAV.Z = (float)NUD_Z.Value;
+                SAV.Y = (float)NUD_Y.Value;
+            }
 
-            SAV.BP = UInt16.Parse(TB_BP.Text);
+            SAV.BP = ushort.Parse(TB_BP.Text);
             // Set Current PokéMiles
             SAV.setPSSStat(0xFC / 4, Util.ToUInt32(TB_PM.Text));
             // Set Max Obtained Pokémiles
             SAV.setPSSStat(0x100 / 4, Util.ToUInt32(TB_PM.Text));
-            SAV.Style = Byte.Parse(TB_Style.Text);
+            SAV.Style = byte.Parse(TB_Style.Text);
 
             // Copy Badges
             int badgeval = 0;
-            CheckBox[] cba = { cb1, cb2, cb3, cb4, cb5, cb6, cb7, cb8, };
             for (int i = 0; i < 8; i++)
                 badgeval |= (cba[i].Checked ? 1 : 0) << i;
             SAV.Badges = badgeval;
 
             // Save PlayTime
-            SAV.PlayedHours = UInt16.Parse(MT_Hours.Text);
-            SAV.PlayedMinutes = UInt16.Parse(MT_Minutes.Text)%60;
-            SAV.PlayedSeconds = UInt16.Parse(MT_Seconds.Text)%60;
+            SAV.PlayedHours = ushort.Parse(MT_Hours.Text);
+            SAV.PlayedMinutes = ushort.Parse(MT_Minutes.Text)%60;
+            SAV.PlayedSeconds = ushort.Parse(MT_Seconds.Text)%60;
 
             // Sprite
-            SAV.Sprite = Convert.ToByte(CB_Multi.SelectedValue);
+            SAV.Sprite = Convert.ToByte(CB_MultiplayerSprite.SelectedValue);
 
             // Appearance
             if (SAV.XY)
             {
-                SAV.Data[SAV.TrainerCard + 0x30] = Byte.Parse(MT_14030.Text);
-                SAV.Data[SAV.TrainerCard + 0x31] = (byte)(Byte.Parse(MT_HairColor.Text) + (Byte.Parse(MT_Hat.Text) << 3));
-                SAV.Data[SAV.TrainerCard + 0x32] = Byte.Parse(MT_14032.Text);
-                SAV.Data[SAV.TrainerCard + 0x33] = Byte.Parse(MT_14033.Text);
-                SAV.Data[SAV.TrainerCard + 0x34] = Byte.Parse(MT_14034.Text);
-                SAV.Data[SAV.TrainerCard + 0x35] = Byte.Parse(MT_14035.Text);
-                SAV.Data[SAV.TrainerCard + 0x36] = Byte.Parse(MT_14036.Text);
-                SAV.Data[SAV.TrainerCard + 0x37] = Byte.Parse(MT_14037.Text);
-                SAV.Data[SAV.TrainerCard + 0x38] = Byte.Parse(MT_14038.Text);
-                SAV.Data[SAV.TrainerCard + 0x39] = Byte.Parse(MT_14039.Text);
-                SAV.Data[SAV.TrainerCard + 0x3A] = Byte.Parse(MT_1403A.Text);
-                SAV.Data[SAV.TrainerCard + 0x3B] = Byte.Parse(MT_1403B.Text);
-                SAV.Data[SAV.TrainerCard + 0x3C] = Byte.Parse(MT_1403C.Text);
-                SAV.Data[SAV.TrainerCard + 0x3D] = Byte.Parse(MT_1403D.Text);
-                SAV.Data[SAV.TrainerCard + 0x3E] = Byte.Parse(MT_1403E.Text);
-                SAV.Data[SAV.TrainerCard + 0x3F] = Byte.Parse(MT_1403F.Text);
+                SAV.Data[SAV.TrainerCard + 0x30] = byte.Parse(MT_14030.Text);
+                SAV.Data[SAV.TrainerCard + 0x31] = (byte)(byte.Parse(MT_HairColor.Text) | (byte.Parse(MT_Hat.Text) << 3));
+                SAV.Data[SAV.TrainerCard + 0x32] = byte.Parse(MT_14032.Text);
+                SAV.Data[SAV.TrainerCard + 0x33] = byte.Parse(MT_14033.Text);
+                SAV.Data[SAV.TrainerCard + 0x34] = byte.Parse(MT_14034.Text);
+                SAV.Data[SAV.TrainerCard + 0x35] = byte.Parse(MT_14035.Text);
+                SAV.Data[SAV.TrainerCard + 0x36] = byte.Parse(MT_14036.Text);
+                SAV.Data[SAV.TrainerCard + 0x37] = byte.Parse(MT_14037.Text);
+                SAV.Data[SAV.TrainerCard + 0x38] = byte.Parse(MT_14038.Text);
+                SAV.Data[SAV.TrainerCard + 0x39] = byte.Parse(MT_14039.Text);
+                SAV.Data[SAV.TrainerCard + 0x3A] = byte.Parse(MT_1403A.Text);
+                SAV.Data[SAV.TrainerCard + 0x3B] = byte.Parse(MT_1403B.Text);
+                SAV.Data[SAV.TrainerCard + 0x3C] = byte.Parse(MT_1403C.Text);
+                SAV.Data[SAV.TrainerCard + 0x3D] = byte.Parse(MT_1403D.Text);
+                SAV.Data[SAV.TrainerCard + 0x3E] = byte.Parse(MT_1403E.Text);
+                SAV.Data[SAV.TrainerCard + 0x3F] = byte.Parse(MT_1403F.Text);
             }
 
             // Vivillon
             SAV.Vivillon = CB_Vivillon.SelectedIndex;
+
+            int seconds = (int)(CAL_AdventureStartDate.Value - new DateTime(2000, 1, 1)).TotalSeconds;
+            seconds -= seconds%86400;
+            seconds += (int)(CAL_AdventureStartTime.Value - new DateTime(2000, 1, 1)).TotalSeconds;
+            SAV.SecondsToStart = seconds;
+
+            SAV.LastSavedYear = CAL_LastSavedDate.Value.Year;
+            SAV.LastSavedMonth = CAL_LastSavedDate.Value.Month;
+            SAV.LastSavedDay = CAL_LastSavedDate.Value.Day;
+            SAV.LastSavedHour = CAL_LastSavedTime.Value.Hour;
+            SAV.LastSavedMinute = CAL_LastSavedTime.Value.Minute;
         }
 
         private void clickOT(object sender, MouseEventArgs e)
         {
-            TextBox tb = !(sender is TextBox) ? TB_OTName : sender as TextBox;
+            TextBox tb = sender as TextBox ?? TB_OTName;
             // Special Character Form
-            if (ModifierKeys == Keys.Control && !Main.specialChars)
-                new f2_Text(tb).Show();
+            if (ModifierKeys != Keys.Control)
+                return;
+
+            var z = Application.OpenForms.Cast<Form>().FirstOrDefault(form => form.Name == typeof(f2_Text).Name) as f2_Text;
+            if (z != null)
+            { z.Location = Location; z.BringToFront(); return; }
+            new f2_Text(tb).Show();
         }
         private void showTSV(object sender, EventArgs e)
         {
@@ -588,7 +615,7 @@ namespace PKHeX
         {
             if (editing) return;
             int offset = Convert.ToInt32(statdata[CB_Stats.SelectedIndex * 2].Substring(2), 16);
-            SAV.setPSSStat(offset/4, UInt32.Parse(MT_Stat.Text));
+            SAV.setPSSStat(offset/4, uint.Parse(MT_Stat.Text));
         }
         private void giveAllAccessories(object sender, EventArgs e)
         {
@@ -611,14 +638,12 @@ namespace PKHeX
         }
         private void toggleBadge(object sender, EventArgs e)
         {
-            int val = Convert.ToInt16(((PictureBox)sender).Name.Last().ToString()) - 1;
-            CheckBox[] chka = { cb1, cb2, cb3, cb4, cb5, cb6, cb7, cb8 };
-            chka[val].Checked = !chka[val].Checked;
+            cba[Array.IndexOf(pba, sender)].Checked ^= true;
         }
 
         private void CB_Multi_SelectedIndexChanged(object sender, EventArgs e)
         {
-            PB_Sprite.Image = (Image)Properties.Resources.ResourceManager.GetObject(Main.SAV.ORAS || Main.SAV.ORASDEMO ? "tr_" + Util.getIndex(CB_Multi).ToString("00") : "tr_00");
+            PB_Sprite.Image = (Image)Properties.Resources.ResourceManager.GetObject(Main.SAV.ORAS || Main.SAV.ORASDEMO ? "tr_" + Util.getIndex(CB_MultiplayerSprite).ToString("00") : "tr_00");
         }
     }
 }

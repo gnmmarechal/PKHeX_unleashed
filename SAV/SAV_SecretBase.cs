@@ -10,7 +10,6 @@ namespace PKHeX
         {
             InitializeComponent();
             Util.TranslateInterface(this, Main.curlanguage);
-            sav = (byte[])Main.SAV.Data.Clone();
             abilitylist = Main.abilitylist;
 
             setupComboBoxes();
@@ -22,45 +21,31 @@ namespace PKHeX
             MT_Flags.Text = BitConverter.ToUInt32(sav, Main.SAV.SecretBase + 0x62C).ToString(); // read counter
             B_SAV2FAV(null, null);
         }
-        public byte[] sav;
-        public bool editing;
+
+        private readonly byte[] sav = (byte[])Main.SAV.Data.Clone();
+        private bool editing;
         private bool loading = true;
 
-        public static string[] abilitylist = { };
+        private static string[] abilitylist;
 
         private void setupComboBoxes()
         {
-            {
-                CB_Ball.DisplayMember = "Text";
-                CB_Ball.ValueMember = "Value";
-                CB_Ball.DataSource = new BindingSource(Main.BallDataSource, null);
-            }
-            {
-                CB_HeldItem.DisplayMember = "Text";
-                CB_HeldItem.ValueMember = "Value";
-                CB_HeldItem.DataSource = new BindingSource(Main.ItemDataSource, null);
-            }
-            {
-                CB_Species.DisplayMember = "Text";
-                CB_Species.ValueMember = "Value";
-                CB_Species.DataSource = new BindingSource(Main.SpeciesDataSource, null);
-            }
-            {
-                CB_Nature.DisplayMember = "Text";
-                CB_Nature.ValueMember = "Value";
-                CB_Nature.DataSource = new BindingSource(Main.NatureDataSource, null);
-            }
-            #region Moves
-            {
-                CB_Move1.DisplayMember = CB_Move2.DisplayMember = CB_Move3.DisplayMember = CB_Move4.DisplayMember = "Text";
-                CB_Move1.ValueMember = CB_Move2.ValueMember = CB_Move3.ValueMember = CB_Move4.ValueMember = "Value";
+            CB_Ball.DisplayMember = CB_HeldItem.DisplayMember = CB_Species.DisplayMember = CB_Nature.DisplayMember = "Text";
+            CB_Ball.ValueMember = CB_HeldItem.ValueMember = CB_Species.ValueMember = CB_Nature.ValueMember = "Value";
 
-                CB_Move1.DataSource = new BindingSource(Main.MoveDataSource, null);
-                CB_Move2.DataSource = new BindingSource(Main.MoveDataSource, null);
-                CB_Move3.DataSource = new BindingSource(Main.MoveDataSource, null);
-                CB_Move4.DataSource = new BindingSource(Main.MoveDataSource, null);
-            }
-            #endregion
+            CB_Ball.DataSource = new BindingSource(Main.BallDataSource, null);
+            CB_HeldItem.DataSource = new BindingSource(Main.ItemDataSource, null);
+            CB_Species.DataSource = new BindingSource(Main.SpeciesDataSource, null);
+            CB_Nature.DataSource = new BindingSource(Main.NatureDataSource, null);
+            
+
+            CB_Move1.DisplayMember = CB_Move2.DisplayMember = CB_Move3.DisplayMember = CB_Move4.DisplayMember = "Text";
+            CB_Move1.ValueMember = CB_Move2.ValueMember = CB_Move3.ValueMember = CB_Move4.ValueMember = "Value";
+
+            CB_Move1.DataSource = new BindingSource(Main.MoveDataSource, null);
+            CB_Move2.DataSource = new BindingSource(Main.MoveDataSource, null);
+            CB_Move3.DataSource = new BindingSource(Main.MoveDataSource, null);
+            CB_Move4.DataSource = new BindingSource(Main.MoveDataSource, null);
         }
 
         // Repopulation Functions
@@ -223,7 +208,7 @@ namespace PKHeX
 
         private void changeObjectIndex(object sender, EventArgs e)
         {
-            int objindex = (int)(NUD_FObject.Value) - 1;
+            int objindex = (int)NUD_FObject.Value - 1;
             byte[] objinfo = new byte[12];
             for (int i = 0; i < 12; i++)
                 objinfo[i] = objdata[objindex, i];
@@ -277,29 +262,29 @@ namespace PKHeX
             int index = currentpkm;
             byte[] pkm = new byte[0x34];
 
-            Array.Copy(BitConverter.GetBytes(Util.getHEXval(TB_EC.Text)), 0, pkm, 0, 4);  // EC
-            Array.Copy(BitConverter.GetBytes(Util.getIndex(CB_Species)), 0, pkm, 8, 2);
-            Array.Copy(BitConverter.GetBytes(Util.getIndex(CB_HeldItem)), 0, pkm, 0xA, 2);
-            pkm[0xC] = (byte)Array.IndexOf(abilitylist, (CB_Ability.Text).Remove((CB_Ability.Text).Length - 4)); // Ability
-            pkm[0xD] = (byte)(CB_Ability.SelectedIndex << 1);   // Number
+            BitConverter.GetBytes(Util.getHEXval(TB_EC.Text)).CopyTo(pkm, 0);
+            BitConverter.GetBytes((ushort)Util.getIndex(CB_Species)).CopyTo(pkm, 8);
+            BitConverter.GetBytes((ushort)Util.getIndex(CB_HeldItem)).CopyTo(pkm, 0xA);
+            pkm[0xC] = (byte)Array.IndexOf(abilitylist, CB_Ability.Text.Remove(CB_Ability.Text.Length - 4));
+            pkm[0xD] = (byte)(CB_Ability.SelectedIndex << 1);
             pkm[0x14] = (byte)Util.getIndex(CB_Nature);
 
             int fegform = 0;
-            fegform += PKX.getGender(Label_Gender.Text) << 1;                         // Gender
-            fegform += ((Util.getIndex(CB_Form)) * 8);
+            fegform += PKX.getGender(Label_Gender.Text) << 1;
+            fegform += CB_Form.SelectedIndex << 3;
             pkm[0x15] = (byte)fegform;
 
-            pkm[0x16] = (byte)(Math.Min(Convert.ToInt32( TB_HPEV.Text), 252));
-            pkm[0x17] = (byte)(Math.Min(Convert.ToInt32(TB_ATKEV.Text), 252));
-            pkm[0x18] = (byte)(Math.Min(Convert.ToInt32(TB_DEFEV.Text), 252));
-            pkm[0x19] = (byte)(Math.Min(Convert.ToInt32(TB_SPAEV.Text), 252));
-            pkm[0x1A] = (byte)(Math.Min(Convert.ToInt32(TB_SPDEV.Text), 252));
-            pkm[0x1B] = (byte)(Math.Min(Convert.ToInt32(TB_SPEEV.Text), 252));
+            pkm[0x16] = (byte)Math.Min(Convert.ToInt32( TB_HPEV.Text), 252);
+            pkm[0x17] = (byte)Math.Min(Convert.ToInt32(TB_ATKEV.Text), 252);
+            pkm[0x18] = (byte)Math.Min(Convert.ToInt32(TB_DEFEV.Text), 252);
+            pkm[0x19] = (byte)Math.Min(Convert.ToInt32(TB_SPAEV.Text), 252);
+            pkm[0x1A] = (byte)Math.Min(Convert.ToInt32(TB_SPDEV.Text), 252);
+            pkm[0x1B] = (byte)Math.Min(Convert.ToInt32(TB_SPEEV.Text), 252);
 
-            Array.Copy(BitConverter.GetBytes(Util.getIndex(CB_Move1)), 0, pkm, 0x1C, 2);
-            Array.Copy(BitConverter.GetBytes(Util.getIndex(CB_Move2)), 0, pkm, 0x1E, 2);
-            Array.Copy(BitConverter.GetBytes(Util.getIndex(CB_Move3)), 0, pkm, 0x20, 2);
-            Array.Copy(BitConverter.GetBytes(Util.getIndex(CB_Move4)), 0, pkm, 0x22, 2);
+            BitConverter.GetBytes((ushort)Util.getIndex(CB_Move1)).CopyTo(pkm, 0x1C);
+            BitConverter.GetBytes((ushort)Util.getIndex(CB_Move2)).CopyTo(pkm, 0x1E);
+            BitConverter.GetBytes((ushort)Util.getIndex(CB_Move3)).CopyTo(pkm, 0x20);
+            BitConverter.GetBytes((ushort)Util.getIndex(CB_Move4)).CopyTo(pkm, 0x22);
             
             pkm[0x24] = (byte)CB_PPu1.SelectedIndex;
             pkm[0x25] = (byte)CB_PPu2.SelectedIndex;
@@ -471,13 +456,12 @@ namespace PKHeX
 
             int favoff = Main.SAV.SecretBase + 0x63A;
             string BaseTrainer = Util.TrimFromZero(Encoding.Unicode.GetString(sav, favoff + index * 0x3E0 + 0x218, 0x1A));
-            if (BaseTrainer.Length < 1 || BaseTrainer[0] == '\0')
+            if (string.IsNullOrEmpty(BaseTrainer))
                 BaseTrainer = "Empty";
 
-            if (
-                Util.Prompt(MessageBoxButtons.YesNo,
-                    String.Format("Delete {1}'s base (Entry {0}) from your records?", index, BaseTrainer)) != DialogResult.Yes) 
+            if (DialogResult.Yes != Util.Prompt(MessageBoxButtons.YesNo, $"Delete {BaseTrainer}'s base (Entry {index}) from your records?")) 
                 return;
+
             const int max = 29; 
             const int size = 0x3E0;
             int offset = favoff + index * size;

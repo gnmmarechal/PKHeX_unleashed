@@ -22,18 +22,15 @@ Menu_Save = Save PK6...
 Menu_ExportSAV = Export SAV...
 Menu_ExportMAIN = Export main
 Menu_ExportBAK = Export BAK
-Menu_ExportRAMSAV = Export ramsav
-Menu_ExportTransfer = Transfer ramsav
 Menu_Exit = Quit
 --
 Menu_Tools = Tools
 Menu_Showdown = Showdown
 Menu_ShowdownImportPK6 = Import Set from Clipboard
-Menu_ShowdownExportPK6 = Export Set from Clipboard
+Menu_ShowdownExportPK6 = Export Set to Clipboard
 Menu_ShowdownExportParty = Export Party to Clipboard
 Menu_ShowdownExportBattleBox = Export Battle Box to Clipboard
 Menu_CyberGadget = CyberGadget
-Menu_CodeGenerator = Code Generator
 Menu_OpenTemp = Open Temp Folder
 Menu_OpenCache = Open Cache Folder
 Menu_Data = Data
@@ -50,8 +47,13 @@ Menu_Language = Sprache
 Menu_Modify = Bei Einstellung auf SAV
 Menu_ModifyDex = Ändern Pokédex
 Menu_ModifyPK6 = Ändern PK6 Info
-Menu_Unicode = Toggle Font
+Menu_Unicode = Unicode
 Menu_About = Über PKHeX
+--------------------Context Menus----------------------
+mnuView = Zeige
+mnuSet = Einstellen
+mnuDelete = Löschen
+mnu2View = Zeige
 --------------------Main Tab Data----------------------
 Tab_Main = Haupt
 Label_PID = PID:

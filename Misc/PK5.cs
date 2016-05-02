@@ -4,11 +4,11 @@ using System.Text;
 
 namespace PKHeX
 {
-    public class PK5 // 5th Generation PKM File
+    public class PK5 : PKM // 5th Generation PKM File
     {
-        internal static readonly int SIZE_PARTY = 220;
-        internal static readonly int SIZE_STORED = 136;
-        internal static readonly int SIZE_BLOCK = 32;
+        internal const int SIZE_PARTY = 220;
+        internal const int SIZE_STORED = 136;
+        internal const int SIZE_BLOCK = 32;
 
         public PK5(byte[] decryptedData = null, string ident = null)
         {
@@ -115,7 +115,7 @@ namespace PKHeX
         public int IV_SPA { get { return (int)(IV32 >> 20) & 0x1F; } set { IV32 = (uint)((IV32 & ~(0x1F << 20)) | (uint)((value > 31 ? 31 : value) << 20)); } }
         public int IV_SPD { get { return (int)(IV32 >> 25) & 0x1F; } set { IV32 = (uint)((IV32 & ~(0x1F << 25)) | (uint)((value > 31 ? 31 : value) << 25)); } }
         public bool IsEgg { get { return ((IV32 >> 30) & 1) == 1; } set { IV32 = (uint)((IV32 & ~0x40000000) | (uint)(value ? 0x40000000 : 0)); } }
-        public bool IsNicknamed { get { return ((IV32 >> 31) & 1) == 1; } set { IV32 = ((IV32 & 0x7FFFFFFF) | (value ? 0x80000000 : 0)); } }
+        public bool IsNicknamed { get { return ((IV32 >> 31) & 1) == 1; } set { IV32 = (IV32 & 0x7FFFFFFF) | (value ? 0x80000000 : 0); } }
 
         private byte RIB4 { get { return Data[0x3C]; } set { Data[0x3C] = value; } } // Hoenn 1a
         public bool RIB4_0 { get { return (RIB4 & (1 << 0)) == 1 << 0; } set { RIB4 = (byte)(RIB4 & ~(1 << 0) | (value ? 1 << 0 : 0)); } } //	Cool Ribbon
@@ -168,7 +168,7 @@ namespace PKHeX
         {
             get
             {
-                return PKM.TrimFromFFFF(Encoding.Unicode.GetString(Data, 0x48, 22))
+                return TrimFromFFFF(Encoding.Unicode.GetString(Data, 0x48, 22))
                     .Replace("\uE08F", "\u2640") // nidoran
                     .Replace("\uE08E", "\u2642") // nidoran
                     .Replace("\u2019", "\u0027"); // farfetch'd
@@ -231,7 +231,7 @@ namespace PKHeX
         {
             get
             {
-                return PKM.TrimFromFFFF(Encoding.Unicode.GetString(Data, 0x68, 16))
+                return TrimFromFFFF(Encoding.Unicode.GetString(Data, 0x68, 16))
                     .Replace("\uE08F", "\u2640") // Nidoran ♂
                     .Replace("\uE08E", "\u2642") // Nidoran ♀
                     .Replace("\u2019", "\u0027"); // farfetch'd
@@ -277,16 +277,17 @@ namespace PKHeX
                 IV_SPE = value[3]; IV_SPA = value[4]; IV_SPD = value[5];
             }
         }
-        public int[] EVs { get { return new[] { EV_HP, EV_ATK, EV_DEF, EV_SPE, EV_SPA, EV_SPD }; } }
-        public int PSV { get { return (int)((PID >> 16 ^ PID & 0xFFFF) >> 3); } }
-        public int TSV { get { return (TID ^ SID) >> 3; } }
-        public bool IsShiny { get { return TSV == PSV; } }
-        public bool PKRS_Infected { get { return PKRS_Strain > 0; } }
-        public bool PKRS_Cured { get { return PKRS_Days == 0 && PKRS_Strain > 0; } }
-        public bool Gen5 { get { return Version >= 20 && Version <= 23; } }
-        public bool Gen4 { get { return Version >= 10 && Version < 12 || Version >= 7 && Version <= 8; } }
-        public bool Gen3 { get { return Version >= 1 && Version <= 5 || Version == 15; } }
-        public bool GenU { get { return !(Gen5 || Gen4 || Gen3); } }
+        public int[] EVs => new[] { EV_HP, EV_ATK, EV_DEF, EV_SPE, EV_SPA, EV_SPD };
+        public int PSV => (int)((PID >> 16 ^ PID & 0xFFFF) >> 3);
+        public int TSV => (TID ^ SID) >> 3;
+        public bool IsShiny => TSV == PSV;
+        public bool PKRS_Infected => PKRS_Strain > 0;
+        public bool PKRS_Cured => PKRS_Days == 0 && PKRS_Strain > 0;
+        public bool Gen5 => Version >= 20 && Version <= 23;
+        public bool Gen4 => Version >= 10 && Version < 12 || Version >= 7 && Version <= 8;
+        public bool Gen3 => Version >= 1 && Version <= 5 || Version == 15;
+        public bool GenU => !(Gen5 || Gen4 || Gen3);
+
         public int[] Moves { 
             get { return new[] {Move1, Move2, Move3, Move4}; }
             set { 
@@ -296,6 +297,10 @@ namespace PKHeX
                 if (value.Length > 3) Move4 = value[3]; } }
 
         // Complex Generated Attributes
+        public byte[] EncryptedPartyData => Encrypt().Take(SIZE_PARTY).ToArray();
+        public byte[] EncryptedBoxData => Encrypt().Take(SIZE_STORED).ToArray();
+        public byte[] DecryptedPartyData => Data.Take(SIZE_PARTY).ToArray();
+        public byte[] DecryptedBoxData => Data.Take(SIZE_STORED).ToArray();
         public int Characteristic
         {
             get
@@ -335,7 +340,7 @@ namespace PKHeX
         public ushort CalculateChecksum()
         {
             ushort chk = 0;
-            for (int i = 8; i < SIZE_STORED; i += 2) // Loop through the entire PK6
+            for (int i = 8; i < SIZE_STORED; i += 2) // Loop through the entire PK5
                 chk += BitConverter.ToUInt16(Data, i);
 
             return chk;
@@ -383,6 +388,11 @@ namespace PKHeX
                 Move1_PPUps = Move2_PPUps;
                 Move2 = Move2_PP = Move2_PPUps = 0;
             }
+        }
+        public byte[] Encrypt()
+        {
+            Checksum = CalculateChecksum();
+            return encryptArray(Data);
         }
 
         public PK6 convertToPK6()
@@ -518,54 +528,54 @@ namespace PKHeX
             // Copy Ribbons to their new locations.
             int bx30 = 0;
             // bx30 |= 0;                             // Kalos Champ - New Kalos Ribbon
-            bx30 |= (((Data[0x3E] & 0x10) >> 4) << 1); // Hoenn Champion
-            bx30 |= (((Data[0x24] & 0x01) >> 0) << 2); // Sinnoh Champ
+            bx30 |= ((Data[0x3E] & 0x10) >> 4) << 1; // Hoenn Champion
+            bx30 |= ((Data[0x24] & 0x01) >> 0) << 2; // Sinnoh Champ
             // bx30 |= 0;                             // Best Friend - New Kalos Ribbon
             // bx30 |= 0;                             // Training    - New Kalos Ribbon
             // bx30 |= 0;                             // Skillful    - New Kalos Ribbon
             // bx30 |= 0;                             // Expert      - New Kalos Ribbon
-            bx30 |= (((Data[0x3F] & 0x01) >> 0) << 7); // Effort Ribbon
+            bx30 |= ((Data[0x3F] & 0x01) >> 0) << 7; // Effort Ribbon
             pk6.Data[0x30] = (byte)bx30;
 
             int bx31 = 0;
-            bx31 |= (((Data[0x24] & 0x80) >> 7) << 0);  // Alert
-            bx31 |= (((Data[0x25] & 0x01) >> 0) << 1);  // Shock
-            bx31 |= (((Data[0x25] & 0x02) >> 1) << 2);  // Downcast
-            bx31 |= (((Data[0x25] & 0x04) >> 2) << 3);  // Careless
-            bx31 |= (((Data[0x25] & 0x08) >> 3) << 4);  // Relax
-            bx31 |= (((Data[0x25] & 0x10) >> 4) << 5);  // Snooze
-            bx31 |= (((Data[0x25] & 0x20) >> 5) << 6);  // Smile
-            bx31 |= (((Data[0x25] & 0x40) >> 6) << 7);  // Gorgeous
+            bx31 |= ((Data[0x24] & 0x80) >> 7) << 0;  // Alert
+            bx31 |= ((Data[0x25] & 0x01) >> 0) << 1;  // Shock
+            bx31 |= ((Data[0x25] & 0x02) >> 1) << 2;  // Downcast
+            bx31 |= ((Data[0x25] & 0x04) >> 2) << 3;  // Careless
+            bx31 |= ((Data[0x25] & 0x08) >> 3) << 4;  // Relax
+            bx31 |= ((Data[0x25] & 0x10) >> 4) << 5;  // Snooze
+            bx31 |= ((Data[0x25] & 0x20) >> 5) << 6;  // Smile
+            bx31 |= ((Data[0x25] & 0x40) >> 6) << 7;  // Gorgeous
             pk6.Data[0x31] = (byte)bx31;
 
             int bx32 = 0;
-            bx32 |= (((Data[0x25] & 0x80) >> 7) << 0);  // Royal
-            bx32 |= (((Data[0x26] & 0x01) >> 0) << 1);  // Gorgeous Royal
-            bx32 |= (((Data[0x3E] & 0x80) >> 7) << 2);  // Artist
-            bx32 |= (((Data[0x26] & 0x02) >> 1) << 3);  // Footprint
-            bx32 |= (((Data[0x26] & 0x04) >> 2) << 4);  // Record
-            bx32 |= (((Data[0x26] & 0x10) >> 4) << 5);  // Legend
-            bx32 |= (((Data[0x3F] & 0x10) >> 4) << 6);  // Country
-            bx32 |= (((Data[0x3F] & 0x20) >> 5) << 7);  // National
+            bx32 |= ((Data[0x25] & 0x80) >> 7) << 0;  // Royal
+            bx32 |= ((Data[0x26] & 0x01) >> 0) << 1;  // Gorgeous Royal
+            bx32 |= ((Data[0x3E] & 0x80) >> 7) << 2;  // Artist
+            bx32 |= ((Data[0x26] & 0x02) >> 1) << 3;  // Footprint
+            bx32 |= ((Data[0x26] & 0x04) >> 2) << 4;  // Record
+            bx32 |= ((Data[0x26] & 0x10) >> 4) << 5;  // Legend
+            bx32 |= ((Data[0x3F] & 0x10) >> 4) << 6;  // Country
+            bx32 |= ((Data[0x3F] & 0x20) >> 5) << 7;  // National
             pk6.Data[0x32] = (byte)bx32;
 
             int bx33 = 0;
-            bx33 |= (((Data[0x3F] & 0x40) >> 6) << 0);  // Earth
-            bx33 |= (((Data[0x3F] & 0x80) >> 7) << 1);  // World
-            bx33 |= (((Data[0x27] & 0x04) >> 2) << 2);  // Classic
-            bx33 |= (((Data[0x27] & 0x08) >> 3) << 3);  // Premier
-            bx33 |= (((Data[0x26] & 0x08) >> 3) << 4);  // Event
-            bx33 |= (((Data[0x26] & 0x40) >> 6) << 5);  // Birthday
-            bx33 |= (((Data[0x26] & 0x80) >> 7) << 6);  // Special
-            bx33 |= (((Data[0x27] & 0x01) >> 0) << 7);  // Souvenir
+            bx33 |= ((Data[0x3F] & 0x40) >> 6) << 0;  // Earth
+            bx33 |= ((Data[0x3F] & 0x80) >> 7) << 1;  // World
+            bx33 |= ((Data[0x27] & 0x04) >> 2) << 2;  // Classic
+            bx33 |= ((Data[0x27] & 0x08) >> 3) << 3;  // Premier
+            bx33 |= ((Data[0x26] & 0x08) >> 3) << 4;  // Event
+            bx33 |= ((Data[0x26] & 0x40) >> 6) << 5;  // Birthday
+            bx33 |= ((Data[0x26] & 0x80) >> 7) << 6;  // Special
+            bx33 |= ((Data[0x27] & 0x01) >> 0) << 7;  // Souvenir
             pk6.Data[0x33] = (byte)bx33;
 
             int bx34 = 0;
-            bx34 |= (((Data[0x27] & 0x02) >> 1) << 0);  // Wishing Ribbon
-            bx34 |= (((Data[0x3F] & 0x02) >> 1) << 1);  // Battle Champion
-            bx34 |= (((Data[0x3F] & 0x04) >> 2) << 2);  // Regional Champion
-            bx34 |= (((Data[0x3F] & 0x08) >> 3) << 3);  // National Champion
-            bx34 |= (((Data[0x26] & 0x20) >> 5) << 4);  // World Champion
+            bx34 |= ((Data[0x27] & 0x02) >> 1) << 0;  // Wishing Ribbon
+            bx34 |= ((Data[0x3F] & 0x02) >> 1) << 1;  // Battle Champion
+            bx34 |= ((Data[0x3F] & 0x04) >> 2) << 2;  // Regional Champion
+            bx34 |= ((Data[0x3F] & 0x08) >> 3) << 3;  // National Champion
+            bx34 |= ((Data[0x26] & 0x20) >> 5) << 4;  // World Champion
             pk6.Data[0x34] = (byte)bx34;
             
             // Write Transfer Location - location is dependent on 3DS system that transfers.
@@ -576,6 +586,7 @@ namespace PKHeX
             // Write the Memories, Friendship, and Origin!
             pk6.CurrentHandler = 1;
             pk6.HT_Name = Converter.OT_Name;
+            pk6.HT_Gender = Converter.OT_Gender;
             pk6.Geo1_Region = Converter.Region;
             pk6.Geo1_Country = Converter.Country;
             pk6.HT_Intensity = 1;
@@ -594,6 +605,59 @@ namespace PKHeX
 
             // HMs are not deleted 5->6, transfer away (but fix if blank spots?)
             pk6.FixMoves();
+
+            // Decapitalize
+            if (!pk6.IsNicknamed && pk6.Nickname.Length > 1)
+                pk6.Nickname = char.ToUpper(pk6.Nickname[0]) + pk6.Nickname.Substring(1).ToLower();
+
+            // Fix Name Strings
+            pk6.Nickname = pk6.Nickname
+                .Replace('\u2467', '\u00d7') // ×
+                .Replace('\u2468', '\u00f7') // ÷
+                .Replace('\u246c', '\u2026') // …
+
+                .Replace('\u246d', '\uE08E') // ♂
+                .Replace('\u246e', '\uE08F') // ♀
+                .Replace('\u246f', '\uE090') // ♠
+                .Replace('\u2470', '\uE091') // ♣
+                .Replace('\u2471', '\uE092') // ♥
+                .Replace('\u2472', '\uE093') // ♦
+                .Replace('\u2473', '\uE094') // ★
+                .Replace('\u2474', '\uE095') // ◎
+
+                .Replace('\u2475', '\uE096') // ○
+                .Replace('\u2476', '\uE097') // □
+                .Replace('\u2477', '\uE098') // △
+                .Replace('\u2478', '\uE099') // ◇
+                .Replace('\u2479', '\uE09A') // ♪
+                .Replace('\u247a', '\uE09B') // ☀
+                .Replace('\u247b', '\uE09C') // ☁
+                .Replace('\u247d', '\uE09D') // ☂
+                ;
+
+            pk6.OT_Name = pk6.OT_Name
+                .Replace('\u2467', '\u00d7') // ×
+                .Replace('\u2468', '\u00f7') // ÷
+                .Replace('\u246c', '\u2026') // …
+
+                .Replace('\u246d', '\uE08E') // ♂
+                .Replace('\u246e', '\uE08F') // ♀
+                .Replace('\u246f', '\uE090') // ♠
+                .Replace('\u2470', '\uE091') // ♣
+                .Replace('\u2471', '\uE092') // ♥
+                .Replace('\u2472', '\uE093') // ♦
+                .Replace('\u2473', '\uE094') // ★
+                .Replace('\u2474', '\uE095') // ◎
+
+                .Replace('\u2475', '\uE096') // ○
+                .Replace('\u2476', '\uE097') // □
+                .Replace('\u2477', '\uE098') // △
+                .Replace('\u2478', '\uE099') // ◇
+                .Replace('\u2479', '\uE09A') // ♪
+                .Replace('\u247a', '\uE09B') // ☀
+                .Replace('\u247b', '\uE09C') // ☁
+                .Replace('\u247d', '\uE09D') // ☂
+                ;
 
             // Fix Checksum
             pk6.RefreshChecksum();

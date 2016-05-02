@@ -5,11 +5,13 @@ namespace PKHeX
 {
     public partial class MemoryAmie : Form
     {
-        private string[] args = new string[5];
-        private string[] vartypes = new string[5];
+        private readonly string[] args = new string[5];
+        private readonly string[] vartypes = new string[5];
         public MemoryAmie() // Keeping the form reference as a lot of control elements are required to operate.
         {
             InitializeComponent();
+            cba = new[] { CB_Country0, CB_Country1, CB_Country2, CB_Country3, CB_Country4 };
+            mta = new[] { CB_Region0, CB_Region1, CB_Region2, CB_Region3, CB_Region4, };
             CB_Country0.DisplayMember = CB_Country1.DisplayMember = CB_Country2.DisplayMember = CB_Country3.DisplayMember = CB_Country4.DisplayMember = "Text";
             CB_Country0.ValueMember = CB_Country1.ValueMember = CB_Country2.ValueMember = CB_Country3.ValueMember = CB_Country4.ValueMember = "Value";
             CB_Region0.DisplayMember = CB_Region1.DisplayMember = CB_Region2.DisplayMember = CB_Region3.DisplayMember = CB_Region4.DisplayMember = "Text";
@@ -27,7 +29,6 @@ namespace PKHeX
             args[2] = arguments.Length > 2 ? arguments[2] ?? "OT" : "OT";
             args[3] = arguments.Length > 3 ? arguments[3] ?? "Past Gen": "Past Gen";
             args[4] = arguments.Length > 4 ? arguments[4] ?? "Memories with" : "Memories with";
-            ComboBox[] cba = { CB_Country0, CB_Country1, CB_Country2, CB_Country3, CB_Country4, };
             foreach (ComboBox comboBox in cba)
             {
                 comboBox.DisplayMember = "Text";
@@ -40,6 +41,9 @@ namespace PKHeX
         public string[] feeling;
         public string[] quality;
         bool init;
+
+        private readonly ComboBox[] cba;
+        private readonly ComboBox[] mta;
 
         // Load/Save Actions
         private void loadFields()
@@ -77,7 +81,7 @@ namespace PKHeX
             CB_OTFeel.SelectedIndex = Main.pk6.OT_Feeling;
             
             CB_Handler.Items.Clear();
-            CB_Handler.Items.AddRange(new object[] {String.Format("{0} ({1})", Main.pk6.OT_Name, args[2])}); // OTNAME : OT
+            CB_Handler.Items.AddRange(new object[] {$"{Main.pk6.OT_Name} ({args[2]})"}); // OTNAME : OT
 
             if (Util.TrimFromZero(Main.pk6.HT_Name) != "")
                 CB_Handler.Items.AddRange(new object[] { Main.pk6.HT_Name });
@@ -88,30 +92,33 @@ namespace PKHeX
 
             GB_M_OT.Enabled = GB_M_CT.Enabled = GB_Residence.Enabled = 
             BTN_Save.Enabled = M_Fullness.Enabled = M_Enjoyment.Enabled = 
-            L_Fullness.Enabled = L_Enjoyment.Enabled = (!Main.pk6.IsEgg);
+            L_Fullness.Enabled = L_Enjoyment.Enabled = !Main.pk6.IsEgg;
             
             if (!Main.pk6.IsEgg)
             {
                 bool enable;
-                int game = Main.pk6.Version;
-                if (game < 24 && game != 0)
+                if (!Main.pk6.Gen6)
                 {
-                    // Banked Mon
-                    GB_M_OT.Text = String.Format("{0} {2}: {1}", args[3], args[2], Main.pk6.OT_Name); // Past Gen : OT : OTNAME
-                    GB_M_CT.Text = String.Format("{0} {1}", args[4], Main.pk6.HT_Name); // Memories with : HTNAME
+                    // Previous Generation Mon
+                    GB_M_OT.Text = $"{args[3]} {Main.pk6.OT_Name}: {args[2]}"; // Past Gen OT : OTNAME
+                    GB_M_CT.Text = $"{args[4]} {Main.pk6.HT_Name}"; // Memories with : HTNAME
                     enable = false;
+                    // Reset to no memory
+                    M_OT_Affection.Text = "0";
+                    CB_OTQual.SelectedIndex = CB_OTFeel.SelectedIndex = 0;
+                    CB_OTVar.SelectedValue = CB_OTMemory.SelectedValue = 0;
                 }
                 else
                 {
                     enable = true;
-                    GB_M_OT.Text = String.Format("{0} {1} ({2})", args[4], Main.pk6.OT_Name, args[2]); // Memories with : OTNAME
-                    GB_M_CT.Text = String.Format("{0} {1}", args[4], Main.pk6.HT_Name); // Memories with : HTNAME
-                    if ((Main.pk6.HT_Name == ""))
+                    GB_M_OT.Text = $"{args[4]} {Main.pk6.OT_Name} ({args[2]})"; // Memories with : OTNAME
+                    GB_M_CT.Text = $"{args[4]} {Main.pk6.HT_Name}"; // Memories with : HTNAME
+                    if (Main.pk6.HT_Name == "")
                     {
                         CB_Country1.Enabled = CB_Country2.Enabled = CB_Country3.Enabled = CB_Country4.Enabled = 
                         CB_Region1.Enabled = CB_Region2.Enabled = CB_Region3.Enabled = CB_Region4.Enabled = 
                         GB_M_CT.Enabled = false;
-                        GB_M_CT.Text = String.Format("{0} {1} - {2}", args[1], args[2], args[0]); // Never Left : OT : Disabled
+                        GB_M_CT.Text = $"{args[1]} {args[2]} - {args[0]}"; // Never Left : OT : Disabled
                     }
                     else
                         GB_M_CT.Text = args[4] + " " + Main.pk6.HT_Name;
@@ -119,7 +126,7 @@ namespace PKHeX
                 RTB_OT.Visible = CB_OTQual.Enabled = CB_OTMemory.Enabled = CB_OTFeel.Enabled = CB_OTVar.Enabled = M_OT_Affection.Enabled = enable;
             }
             else
-                GB_M_OT.Text = GB_M_CT.Text = String.Format("N/A: {0}", Main.eggname);
+                GB_M_OT.Text = GB_M_CT.Text = $"N/A: {Main.eggname}";
 
             init = true;
 
@@ -151,14 +158,14 @@ namespace PKHeX
 
             // Save Memories
             Main.pk6.HT_Memory = Util.getIndex(CB_CTMemory);
-            Main.pk6.HT_TextVar = (CB_CTVar.Enabled) ? Util.getIndex(CB_CTVar) : 0;
-            Main.pk6.HT_Intensity = (CB_CTFeel.Enabled) ? CB_CTQual.SelectedIndex + 1 : 0;
-            Main.pk6.HT_Feeling = (CB_CTFeel.Enabled) ? CB_CTFeel.SelectedIndex : 0;
+            Main.pk6.HT_TextVar = CB_CTVar.Enabled ? Util.getIndex(CB_CTVar) : 0;
+            Main.pk6.HT_Intensity = CB_CTFeel.Enabled ? CB_CTQual.SelectedIndex + 1 : 0;
+            Main.pk6.HT_Feeling = CB_CTFeel.Enabled ? CB_CTFeel.SelectedIndex : 0;
 
             Main.pk6.OT_Memory = Util.getIndex(CB_OTMemory);
-            Main.pk6.OT_TextVar = (CB_OTVar.Enabled) ? Util.getIndex(CB_OTVar) : 0;
-            Main.pk6.OT_Intensity = (CB_OTFeel.Enabled) ? CB_OTQual.SelectedIndex + 1 : 0;
-            Main.pk6.OT_Feeling = (CB_OTFeel.Enabled) ? CB_OTFeel.SelectedIndex : 0;
+            Main.pk6.OT_TextVar = CB_OTVar.Enabled ? Util.getIndex(CB_OTVar) : 0;
+            Main.pk6.OT_Intensity = CB_OTFeel.Enabled ? CB_OTQual.SelectedIndex + 1 : 0;
+            Main.pk6.OT_Feeling = CB_OTFeel.Enabled ? CB_OTFeel.SelectedIndex : 0;
         }
 
         // Event Actions
@@ -294,7 +301,7 @@ namespace PKHeX
         {
             string result;
             string nn = Main.pk6.Nickname;
-            string a = ((Util.cbItem)(arg.SelectedItem) == null) ? arg.Text ?? "ERROR" : ((Util.cbItem)(arg.SelectedItem)).Text;
+            string a = (Util.cbItem)arg.SelectedItem == null ? arg.Text ?? "ERROR" : ((Util.cbItem)arg.SelectedItem).Text;
             int mem = Util.getIndex(m);
 
             bool enabled = false;
@@ -302,7 +309,7 @@ namespace PKHeX
                 result = Main.memories[38];
             else
             {
-                result = String.Format(Main.memories[mem + 38], nn, tr, a, f.Text, q.Text);
+                result = string.Format(Main.memories[mem + 38], nn, tr, a, f.Text, q.Text);
                 enabled = true;
             }
 
@@ -401,10 +408,7 @@ namespace PKHeX
         }
         private void changeCountryIndex(object sender, EventArgs e)
         {
-            ComboBox[] cba = { CB_Country0, CB_Country1, CB_Country2, CB_Country3, CB_Country4 };
-            ComboBox[] mta = { CB_Region0, CB_Region1, CB_Region2, CB_Region3, CB_Region4, };
-
-            int index = Array.IndexOf(cba, sender as ComboBox);
+            int index = Array.IndexOf(cba, sender);
             if (Util.getIndex(sender as ComboBox) > 0)
             {
                 Main.setCountrySubRegion(mta[index], "sr_" + Util.getIndex(sender as ComboBox).ToString("000"));
@@ -440,9 +444,7 @@ namespace PKHeX
         private void clickResetLocation(object sender, EventArgs e)
         {
             Label[] senderarr = { L_Geo0, L_Geo1, L_Geo2, L_Geo3, L_Geo4, };
-            ComboBox[] cba = { CB_Country0, CB_Country1, CB_Country2, CB_Country3, CB_Country4, };
-            ComboBox[] mta = { CB_Region0, CB_Region1, CB_Region2, CB_Region3, CB_Region4, };
-            int index = Array.IndexOf(senderarr, sender as Label);
+            int index = Array.IndexOf(senderarr, sender);
             cba[index].SelectedValue = 0;
 
             mta[index].DisplayMember = "Text";
@@ -451,5 +453,10 @@ namespace PKHeX
             mta[index].SelectedValue = 0;
         }
 
+        private void B_ClearAll_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < 5; i++)
+                cba[i].SelectedValue = 0;
+        }
     }
 }

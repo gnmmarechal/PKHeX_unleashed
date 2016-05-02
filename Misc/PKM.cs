@@ -19,14 +19,13 @@ namespace PKHeX
 
             return seed = seed * a + c;
         }
-
-        internal static Converter Config = new Converter();
-        internal static string[] speclang_ja = Util.getStringList("Species", "ja");
-        internal static string[] speclang_en = Util.getStringList("Species", "en");
-        internal static string[] speclang_fr = Util.getStringList("Species", "fr");
-        internal static string[] speclang_it = Util.getStringList("Species", "it");
-        internal static string[] speclang_de = Util.getStringList("Species", "de");
-        internal static string[] speclang_es = Util.getStringList("Species", "es");
+        
+        internal static readonly string[] speclang_ja = Util.getStringList("species", "ja");
+        internal static readonly string[] speclang_en = Util.getStringList("species", "en");
+        internal static readonly string[] speclang_fr = Util.getStringList("species", "fr");
+        internal static readonly string[] speclang_it = Util.getStringList("species", "it");
+        internal static readonly string[] speclang_de = Util.getStringList("species", "de");
+        internal static readonly string[] speclang_es = Util.getStringList("species", "es");
 
         internal static string TrimFromFFFF(string input)
         {
@@ -111,6 +110,26 @@ namespace PKHeX
 
             // Done
             return ekm;
+        }
+
+        /// <summary>Calculates the CRC16-CCITT checksum over an input byte array.</summary>
+        /// <param name="chunk">Input byte array</param>
+        /// <returns>Checksum</returns>
+        internal static ushort ccitt16(byte[] chunk)
+        {
+            ushort crc = 0xFFFF;
+            foreach (byte t in chunk)
+            {
+                crc ^= (ushort)(t << 8);
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((crc & 0x8000) > 0)
+                        crc = (ushort)(crc << 1 ^ 0x1021);
+                    else
+                        crc <<= 1;
+                }
+            }
+            return crc;
         }
 
         internal static int getUnownForm(uint PID)
@@ -231,7 +250,7 @@ namespace PKHeX
         }
 
         #region Gen 3 Species Table
-        internal static int[] newindex =
+        internal static readonly int[] newindex =
         {
             0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
             31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,
@@ -252,7 +271,7 @@ namespace PKHeX
             345,346,347,348,280,281,282,371,372,373,374,375,376,377,378,379,382,383,384,380,381,
             385,386,358,
         };
-        internal static int[] oldindex =
+        internal static readonly int[] oldindex =
         {
             0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
             31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,
@@ -275,7 +294,7 @@ namespace PKHeX
         };
         #endregion
         #region Gen 3 Ability Table
-        internal static byte[][] Gen3Abilities = 
+        internal static readonly byte[][] Gen3Abilities = 
         {
             new byte[] {0x00, 0x00}, // 000
             new byte[] {0x41, 0x41}, // 001
@@ -1015,7 +1034,7 @@ namespace PKHeX
             4365, 4366, 4367, 4368, 4369, 4370, 4449, 4450, 4451, 4452, 4453, 4454, 4455, 4456, 4457, 4461, 4462, 4466,
             4467, 4469, 47252, 49968, 50108, 50388, 52012, 65535
         };
-        internal static ushort[] G34_4E =
+        internal static readonly ushort[] G34_4E =
         {
             478, 351, 352, 353, 358, 359, 360, 361, 362, 363, 020, 365, 366, 369, 370,
             371, 415, 376, 377, 378, 368, 382, 383, 384, 046, 358, 359, 392, 393, 394,
@@ -1035,7 +1054,7 @@ namespace PKHeX
             337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 289,
             452, 355, 373, 379, 387, 405, 411
         };
-        internal static ushort[] G34_4J =
+        internal static readonly ushort[] G34_4J =
         {
             001, 003, 005, 007, 009, 011, 012, 014, 016, 018, 020, 022, 024, 026, 028,
             030, 032, 034, 037, 039, 041, 043, 044, 045, 046, 047, 048, 051, 054, 057,
@@ -1057,7 +1076,7 @@ namespace PKHeX
         };
         #endregion
 
-        internal static byte[][] G4TransferTrashBytes = {
+        internal static readonly byte[][] G4TransferTrashBytes = {
                 new byte[] { }, // Unused
                 new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
                 new byte[] { 0x18, 0x20, 0x0D, 0x02, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x48, 0xA1, 0x0C, 0x02, 0xE0, 0xFF },
@@ -1076,16 +1095,16 @@ namespace PKHeX
         internal static string OT_Name = "PKHeX";
         internal static int OT_Gender;
 
-        internal static byte[] ConvertPKMtoPK6(byte[] input)
+        internal static PK6 ConvertPKMtoPK6(byte[] input)
         {
             // Detect Input Generation
             if (input.Length == 100 || input.Length == 80) // PK3
-                return new PK3(input).convertToPK4().convertToPK5().convertToPK6().Data;
+                return new PK3(input).convertToPK4().convertToPK5().convertToPK6();
             if (input.Length != 136 && input.Length != 236 && input.Length != 220)  // Invalid
-                return input;
+                return null;
             if ((BitConverter.ToUInt16(input, 0x80) >= 0x3333 || input[0x5F] >= 0x10) && BitConverter.ToUInt16(input, 0x46) == 0) // PK5
-                return new PK5(input).convertToPK6().Data;
-            return new PK4(input).convertToPK5().convertToPK6().Data; // PK4
+                return new PK5(input).convertToPK6();
+            return new PK4(input).convertToPK5().convertToPK6(); // PK4
         }
 
         internal static void updateConfig(int SUBREGION, int COUNTRY, int _3DSREGION, string TRAINERNAME, int TRAINERGENDER)

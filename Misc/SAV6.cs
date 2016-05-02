@@ -15,23 +15,31 @@ namespace PKHeX
     {
         X = 24, Y = 25,
         AS = 26, OR = 27,
-        Z = 28,
-        Unknown = -1,
+        SN = 28, MN = 29,
+        Unknown = 0,
+        Any = -1,
     }
     public class SAV6 : PKX
     {
-        internal static readonly int SIZE_XY = 0x65600;
-        internal static readonly int SIZE_ORAS = 0x76000;
-        internal static readonly int SIZE_ORASDEMO = 0x5A00;
-        internal static readonly int BEEF = 0x42454546;
+        internal const int SIZE_XY = 0x65600;
+        internal const int SIZE_ORAS = 0x76000;
+        internal const int SIZE_ORASDEMO = 0x5A00;
+        internal const int BEEF = 0x42454546;
+        internal static bool SizeValid(int size)
+        {
+            return new[] {SIZE_XY, SIZE_ORAS, SIZE_ORASDEMO}.Contains(size);
+        }
 
         // Global Settings
         internal static bool SetUpdateDex = true;
         internal static bool SetUpdatePK6 = true;
         // Save Data Attributes
-        public byte[] Data, BAK;
-        public bool Exportable;
+        public byte[] Data;
         public bool Edited;
+        public readonly bool Exportable;
+        public readonly byte[] BAK;
+        public string FileName, FilePath;
+        public string BAKName => $"{FileName} [{OT} ({Version}) - {LastSavedTime}].bak";
         public SAV6(byte[] data = null)
         {
             Data = (byte[])(data ?? new byte[SIZE_ORAS]).Clone();
@@ -49,7 +57,7 @@ namespace PKHeX
             {
                 /* 00: */   Item = 0x00000; Items = new Inventory(Item, 1);
                 /* 01: */   // = 0x00C00; // Select Bound Items
-                /* 02: */   // = 0x00E00; [00038] // ???
+                /* 02: */   AdventureInfo = 0x00E00;
                 /* 03: */   Trainer1 = 0x01000;
                 /* 04: */   // = 0x01200; [00004] // ???
                 /* 05: */   PlayTime = 0x01400;
@@ -68,8 +76,8 @@ namespace PKHeX
                     SuperTrain = SecretBase = BoxWallpapers = 
                     LastViewedBox = PCLayout = PCBackgrounds = PCFlags = WondercardFlags = WondercardData = 
                     BerryField = OPower = Accessories = 
-                    PokeDex = PokeDexLanguageFlags = Spinda = EncounterCount = HoF = PSS = JPEG = -1;
-                MaisonStats = 0; // Make things work?
+                    PokeDex = PokeDexLanguageFlags = Spinda = EncounterCount = HoF = PSS = JPEG = Contest -1;
+                MaisonStats = -1;
             }
             else if (XY)
             {
@@ -84,6 +92,7 @@ namespace PKHeX
                 Puff = 0x00000;
                 Item = 0x00400;
                 Items = new Inventory(Item, 0);
+                AdventureInfo = 0x01200;
                 Trainer1 = 0x1400;
                 Trainer2 = 0x4200;
                 PCLayout = 0x4400;
@@ -109,6 +118,7 @@ namespace PKHeX
                 BoxWallpapers = 0x481E;
                 SecretBase = -1;
                 EonTicket = -1;
+                Contest = -1;
                 PlayTime = 0x1800;
                 Accessories = 0x1A00;
                 LastViewedBox = PCLayout + 0x43F;
@@ -126,6 +136,7 @@ namespace PKHeX
                 Puff = 0x00000; // Confirmed
                 Item = 0x00400; // Confirmed
                 Items = new Inventory(Item, 1);
+                AdventureInfo = 0x01200;
                 Trainer1 = 0x01400; // Confirmed
                 Trainer2 = 0x04200; // Confirmed
                 PCLayout = 0x04400; // Confirmed
@@ -144,6 +155,7 @@ namespace PKHeX
                 PokeDexLanguageFlags = PokeDex + 0x400;
                 HoF = 0x19E00; // Confirmed
                 SuperTrain = 0x20200;
+                Contest = 0x23600; // Confirmed
                 JPEG = 0x67C00; // Confirmed
                 MaisonStats = 0x1BBC0;
                 PSS = 0x05000; // Confirmed (thanks Rei)
@@ -159,7 +171,7 @@ namespace PKHeX
         }
         public class Inventory
         {
-            public int HeldItem, KeyItem, Medicine, TMHM, Berry = 0;
+            public readonly int HeldItem, KeyItem, Medicine, TMHM, Berry;
             public Inventory(int Offset, int Game)
             {
                 switch (Game)
@@ -183,9 +195,9 @@ namespace PKHeX
         }
         public Inventory Items = new Inventory(0, -1);
         public int BattleBox, GTS, Daycare, EonTicket,
-            Fused, SUBE, Puff, Item, Trainer1, Trainer2, SuperTrain, PSSStats, MaisonStats, SecretBase, BoxWallpapers, LastViewedBox,
+            Fused, SUBE, Puff, Item, AdventureInfo, Trainer1, Trainer2, SuperTrain, PSSStats, MaisonStats, SecretBase, BoxWallpapers, LastViewedBox,
             PCLayout, PCBackgrounds, PCFlags, WondercardFlags, WondercardData, BerryField, OPower, EventConst, EventFlag, EventAsh, PlayTime, Accessories,
-            PokeDex, PokeDexLanguageFlags, Spinda, EncounterCount, HoF, PSS, JPEG = 0;
+            PokeDex, PokeDexLanguageFlags, Spinda, EncounterCount, HoF, PSS, JPEG, Contest;
         public int TrainerCard = 0x14000;
         public int Box = 0x33000, Party = 0x14200;
         public int[] DaycareSlot;
@@ -205,9 +217,9 @@ namespace PKHeX
                 return GameVersion.Unknown;
             }
         }
-        public bool ORASDEMO { get { return Data.Length == SIZE_ORASDEMO; } }
-        public bool ORAS { get { return !ORASDEMO && (Version == GameVersion.OR || Version == GameVersion.AS); } }
-        public bool XY { get { return (Version == GameVersion.X || Version == GameVersion.Y); } }
+        public bool ORASDEMO => Data.Length == SIZE_ORASDEMO;
+        public bool ORAS => Version == GameVersion.OR || Version == GameVersion.AS;
+        public bool XY => Version == GameVersion.X || Version == GameVersion.Y;
 
         // Save Information
         private int BlockInfoOffset;
@@ -233,7 +245,7 @@ namespace PKHeX
                 };
 
                 // Expand out to nearest 0x200
-                CurrentPosition += (Blocks[i].Length % 0x200 == 0) ? Blocks[i].Length : (0x200 - Blocks[i].Length % 0x200 + Blocks[i].Length);
+                CurrentPosition += Blocks[i].Length % 0x200 == 0 ? Blocks[i].Length : 0x200 - Blocks[i].Length % 0x200 + Blocks[i].Length;
 
                 if ((Blocks[i].ID != 0) || i == 0) continue;
                 count = i;
@@ -257,6 +269,8 @@ namespace PKHeX
                 BitConverter.GetBytes(ccitt16(array)).CopyTo(Data, BlockInfoOffset + 6 + i * 8);
             }
         }
+        public bool ChecksumsValid => verifyG6SAV(Data);
+        public string ChecksumInfo => verifyG6CHK(Data);
         public byte[] Write()
         {
             setChecksums();
@@ -436,6 +450,22 @@ namespace PKHeX
             get { return Data[PlayTime + 3]; }
             set { Data[PlayTime + 3] = (byte)value; }
         }
+        public uint LastSaved { get { return BitConverter.ToUInt32(Data, PlayTime + 0x4); } set { BitConverter.GetBytes(value).CopyTo(Data, PlayTime + 0x4); } }
+        public int LastSavedYear { get { return (int)(LastSaved & 0xFFF); } set { LastSaved = LastSaved & 0xFFFFF000 | (uint)value; } }
+        public int LastSavedMonth { get { return (int)(LastSaved >> 12 & 0xF); } set { LastSaved = LastSaved & 0xFFFF0FFF | ((uint)value & 0xF) << 12; } }
+        public int LastSavedDay { get { return (int)(LastSaved >> 16 & 0x1F); } set { LastSaved = LastSaved & 0xFFE0FFFF | ((uint)value & 0x1F) << 16; } }
+        public int LastSavedHour { get { return (int)(LastSaved >> 21 & 0x1F); } set { LastSaved = LastSaved & 0xFC1FFFFF | ((uint)value & 0x1F) << 21; } }
+        public int LastSavedMinute { get { return (int)(LastSaved >> 26 & 0x3F); } set { LastSaved = LastSaved & 0x03FFFFFF | ((uint)value & 0x3F) << 26; } }
+        public string LastSavedTime => $"{LastSavedYear.ToString("0000")}{LastSavedMonth.ToString("00")}{LastSavedDay.ToString("00")}{LastSavedHour.ToString("00")}{LastSavedMinute.ToString("00")}";
+
+        public int ResumeYear { get { return BitConverter.ToInt32(Data, AdventureInfo + 0x4); } set { BitConverter.GetBytes(value).CopyTo(Data,AdventureInfo + 0x4); } }
+        public int ResumeMonth { get { return Data[AdventureInfo + 0x8]; } set { Data[AdventureInfo + 0x8] = (byte)value; } }
+        public int ResumeDay { get { return Data[AdventureInfo + 0x9]; } set { Data[AdventureInfo + 0x9] = (byte)value; } }
+        public int ResumeHour { get { return Data[AdventureInfo + 0xB]; } set { Data[AdventureInfo + 0xB] = (byte)value; } }
+        public int ResumeMinute { get { return Data[AdventureInfo + 0xC]; } set { Data[AdventureInfo + 0xC] = (byte)value; } }
+        public int ResumeSeconds { get { return Data[AdventureInfo + 0xD]; } set { Data[AdventureInfo + 0xD] = (byte)value; } }
+        public int SecondsToStart { get { return BitConverter.ToInt32(Data, AdventureInfo + 0x18); } set { BitConverter.GetBytes(value).CopyTo(Data, AdventureInfo + 0x18); } }
+        public int SecondsToFame { get { return BitConverter.ToInt32(Data, AdventureInfo + 0x20); } set { BitConverter.GetBytes(value).CopyTo(Data, AdventureInfo + 0x20); } }
 
         public uint getPSSStat(int index) { return BitConverter.ToUInt32(Data, PSSStats + 4*index); }
         public void setPSSStat(int index, uint value) { BitConverter.GetBytes(value).CopyTo(Data, PSSStats + 4*index); }
@@ -488,9 +518,9 @@ namespace PKHeX
 
         public byte[] Puffs { get { return Data.Skip(Puff).Take(100).ToArray(); } set { value.CopyTo(Data, Puff); } }
         public int PuffCount { get { return BitConverter.ToInt32(Data, Puff + 100); } set { BitConverter.GetBytes(value).CopyTo(Data, Puff + 100); } }
-
-        public byte[] getWondercard(int i) { return Data.Skip(WondercardData + i*WC6.Size).Take(WC6.Size).ToArray(); }
-        public void setWondercard(int i, byte[] data) { data.CopyTo(data, WondercardData + i * WC6.Size); }
+        
+        public string JPEGTitle => JPEG > -1 ? null : Util.TrimFromZero(Encoding.Unicode.GetString(Data, JPEG, 0x1A));
+        public byte[] JPEGData => JPEG > -1 || Data[JPEG + 0x54] != 0xFF ? null : Data.Skip(JPEG + 0x54).Take(0xE004).ToArray();
 
         // Data Accessing
         public byte[] getData(int Offset, int Length)
@@ -500,6 +530,7 @@ namespace PKHeX
         public void setData(byte[] input, int Offset)
         {
             input.CopyTo(Data, Offset);
+            Edited = true;
         }
 
         // Pokémon Requests
@@ -513,38 +544,48 @@ namespace PKHeX
         }
         public void setPK6Party(PK6 pk6, int offset, bool? trade = null, bool? dex = null)
         {
+            if (pk6 == null) return;
             if (trade ?? SetUpdatePK6)
                 setPK6(pk6);
             if (dex ?? SetUpdateDex)
                 setDex(pk6);
-
-            byte[] ek6 = encryptArray(pk6.Data);
-            Array.Resize(ref ek6, PK6.SIZE_PARTY);
-            setData(ek6, offset);
+            
+            setData(pk6.EncryptedPartyData, offset);
             Edited = true;
         }
         public void setPK6Stored(PK6 pk6, int offset, bool? trade = null, bool? dex = null)
         {
+            if (pk6 == null) return;
             if (trade ?? SetUpdatePK6)
                 setPK6(pk6);
             if (dex ?? SetUpdateDex)
                 setDex(pk6);
 
-            byte[] ek6 = encryptArray(pk6.Data);
-            Array.Resize(ref ek6, PK6.SIZE_STORED);
-            setData(ek6, offset);
+            setData(pk6.EncryptedBoxData, offset);
             Edited = true;
         }
         public void setEK6Stored(byte[] ek6, int offset, bool? trade = null, bool? dex = null)
         {
+            if (ek6 == null) return;
             PK6 pk6 = new PK6(decryptArray(ek6));
             if (trade ?? SetUpdatePK6)
                 setPK6(pk6);
             if (dex ?? SetUpdateDex)
                 setDex(pk6);
-
-            Array.Resize(ref ek6, PK6.SIZE_STORED);
-            setData(ek6, offset);
+            
+            setData(pk6.EncryptedBoxData, offset);
+            Edited = true;
+        }
+        public void setEK6Party(byte[] ek6, int offset, bool? trade = null, bool? dex = null)
+        {
+            if (ek6 == null) return;
+            PK6 pk6 = new PK6(decryptArray(ek6));
+            if (trade ?? SetUpdatePK6)
+                setPK6(pk6);
+            if (dex ?? SetUpdateDex)
+                setDex(pk6);
+            
+            setData(pk6.EncryptedPartyData, offset);
             Edited = true;
         }
 
@@ -573,6 +614,8 @@ namespace PKHeX
                 return;
             if (pk6.Species == 0)
                 return;
+            if (Version == GameVersion.Unknown)
+                return;
 
             int bit = pk6.Species - 1;
             int lang = pk6.Language - 1; if (lang > 5) lang--; // 0-6 language vals
@@ -591,20 +634,43 @@ namespace PKHeX
                 Data[PokeDex + bit / 8 + 0x8] |= (byte)(1 << (bit % 8));
 
             // Set the Display flag if none are set
-            bool[] chk =
-            {
-                // Flag Regions (base index 1 to reference Wiki and editor)
-                (Data[PokeDex + 0x60*(5) + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0,
-                (Data[PokeDex + 0x60*(6) + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0,
-                (Data[PokeDex + 0x60*(7) + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0,
-                (Data[PokeDex + 0x60*(8) + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0,
-            };
-            if (!chk.Contains(true)) // offset is already biased by 0x60, reuse shiftoff but for the display flags.
-                Data[PokeDex + shiftoff + 0x60 * (4) + bit / 8 + 0x8] |= (byte)(1 << (bit % 8));
+            bool Displayed = false;
+            Displayed |= (Data[PokeDex + 0x60*5 + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0;
+            Displayed |= (Data[PokeDex + 0x60*6 + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0;
+            Displayed |= (Data[PokeDex + 0x60*7 + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0;
+            Displayed |= (Data[PokeDex + 0x60*8 + bit/8 + 0x8] & (byte) (1 << (bit%8))) != 0;
+            if (!Displayed) // offset is already biased by 0x60, reuse shiftoff but for the display flags.
+                Data[PokeDex + shiftoff + 0x60 * 4 + bit / 8 + 0x8] |= (byte)(1 << (bit % 8));
 
             // Set the Language
             if (lang < 0) lang = 1;
-            Data[PokeDexLanguageFlags + (bit * 7 + lang) / 8] |= (byte)(1 << (((bit * 7) + lang) % 8));
+            Data[PokeDexLanguageFlags + (bit * 7 + lang) / 8] |= (byte)(1 << ((bit * 7 + lang) % 8));
+
+            // Set Form flags
+            int fc = Personal[pk6.Species].FormeCount;
+            int f = ORAS ? getDexFormIndexORAS(pk6.Species, fc) : getDexFormIndexXY(pk6.Species, fc);
+            if (f >= 0)
+            {
+                int FormLen = ORAS ? 0x26 : 0x18;
+                int FormDex = PokeDex + 0x368;
+                bit = f + pk6.AltForm;
+                // Set Seen Flag
+                Data[FormDex + FormLen*shiny + bit/8] |= (byte)(1 << (bit%8));
+
+                // Set Displayed Flag if necessary, check all flags
+                bool FormDisplayed = false;
+                for (int i = 0; i < fc; i++)
+                {
+                    bit = f + i;
+                    FormDisplayed |= (Data[FormDex + FormLen*2 + bit/8] & (byte)(1 << (bit%8))) != 0; // Nonshiny
+                    FormDisplayed |= (Data[FormDex + FormLen*3 + bit/8] & (byte)(1 << (bit%8))) != 0; // Shiny
+                }
+                if (!FormDisplayed)
+                {
+                    bit = f + pk6.AltForm;
+                    Data[FormDex + FormLen*(2+shiny) + bit/8] |= (byte)(1 << (bit%8));
+                }
+            }
 
             // Set DexNav count (only if not encountered previously)
             if (ORAS && getEncounterCount(pk6.Species - 1) == 0)
@@ -616,7 +682,12 @@ namespace PKHeX
         }
         public string getBoxName(int box)
         {
-            return Encoding.Unicode.GetString(Data, PCLayout + 0x22*box, 0x22).Trim();
+            return Util.TrimFromZero(Encoding.Unicode.GetString(Data, PCLayout + 0x22*box, 0x22));
+        }
+        public void setBoxName(int box, string val)
+        {
+            Encoding.Unicode.GetBytes(val.PadRight(0x11, '\0')).CopyTo(Data, PCLayout + 0x22*box);
+            Edited = true;
         }
         public void setParty()
         {
@@ -629,7 +700,7 @@ namespace PKHeX
                 byte[] decdata = decryptArray(data);
                 int species = BitConverter.ToInt16(decdata, 8);
                 if ((species != 0) && (species < 722))
-                    Array.Copy(data, 0, Data, Party + (partymembers++) * PK6.SIZE_PARTY, PK6.SIZE_PARTY);
+                    Array.Copy(data, 0, Data, Party + partymembers++ * PK6.SIZE_PARTY, PK6.SIZE_PARTY);
             }
 
             // Write in the current party count
@@ -637,7 +708,7 @@ namespace PKHeX
             // Zero out the party slots that are empty.
             for (int i = 0; i < 6; i++)
                 if (i >= partymembers)
-                    Array.Copy(encryptArray(new byte[PK6.SIZE_PARTY]), 0, Data, Party + (i * PK6.SIZE_PARTY), PK6.SIZE_PARTY);
+                    Array.Copy(encryptArray(new byte[PK6.SIZE_PARTY]), 0, Data, Party + i * PK6.SIZE_PARTY, PK6.SIZE_PARTY);
 
             if (BattleBox < 0)
                 return;
@@ -651,13 +722,13 @@ namespace PKHeX
                 byte[] decdata = decryptArray(data);
                 int species = BitConverter.ToInt16(decdata, 8);
                 if ((species != 0) && (species < 722))
-                    Array.Copy(data, 0, Data, BattleBox + (battlemem++) * PK6.SIZE_STORED, PK6.SIZE_STORED);
+                    Array.Copy(data, 0, Data, BattleBox + battlemem++ * PK6.SIZE_STORED, PK6.SIZE_STORED);
             }
 
             // Zero out the party slots that are empty.
             for (int i = 0; i < 6; i++)
                 if (i >= battlemem)
-                    Array.Copy(encryptArray(new byte[PK6.SIZE_PARTY]), 0, Data, BattleBox + (i * PK6.SIZE_STORED), PK6.SIZE_STORED);
+                    Array.Copy(encryptArray(new byte[PK6.SIZE_PARTY]), 0, Data, BattleBox + i * PK6.SIZE_STORED, PK6.SIZE_STORED);
 
             BattleBoxLocked &= battlemem != 0;
         }
@@ -695,7 +766,7 @@ namespace PKHeX
                 for (int i = 0; i < data.Length; i++)
                 {
                     data[i] = getPK6Stored(Box + PK6.SIZE_STORED * i);
-                    data[i].Identifier = String.Format("B{0}:{1}", (i / 30 + 1).ToString("00"), (i % 30 + 1).ToString("00"));
+                    data[i].Identifier = $"B{(i/30 + 1).ToString("00")}:{(i%30 + 1).ToString("00")}";
                 }
                 return data;
             }
@@ -728,7 +799,7 @@ namespace PKHeX
                 if (value[0].Species == 0)
                     throw new ArgumentException("Can't have an empty first slot." + value.Length);
 
-                PK6[] newParty = value.Where(pk => (pk.Species != 0)).ToArray();
+                PK6[] newParty = value.Where(pk => pk.Species != 0).ToArray();
                 
                 PartyCount = newParty.Length;
                 Array.Resize(ref newParty, 6);
@@ -754,6 +825,60 @@ namespace PKHeX
             }
         }
 
+        public bool[] WC6Flags
+        {
+            get
+            {
+                if (WondercardData < 0 || WondercardFlags < 0)
+                    return null;
+
+                bool[] r = new bool[(WondercardData-WondercardFlags)*8];
+                for (int i = 0; i < r.Length; i++)
+                    r[i] = (Data[WondercardFlags + (i>>3)] >> (i&7) & 0x1) == 1;
+                return r;
+            }
+            set
+            {
+                if (WondercardData < 0 || WondercardFlags < 0)
+                    return;
+                if ((WondercardData - WondercardFlags)*8 != value?.Length)
+                    return;
+
+                byte[] data = new byte[value.Length/8];
+                for (int i = 0; i < value.Length; i++)
+                    if (value[i])
+                        data[i>>3] |= (byte)(1 << (i&7));
+
+                data.CopyTo(Data, WondercardFlags);
+                Edited = true;
+            }
+        }
+        public WC6 getWC6(int index)
+        {
+            if (WondercardData < 0)
+                return null;
+            if (index < 0 || index > 24)
+                return null;
+
+            return new WC6(Data.Skip(WondercardData + index * WC6.Size).Take(WC6.Size).ToArray());
+        }
+        public void setWC6(WC6 wc6, int index)
+        {
+            if (WondercardData < 0)
+                return;
+            if (index < 0 || index > 24)
+                return;
+
+            wc6.Data.CopyTo(Data, WondercardData + index * WC6.Size);
+
+            for (int i = 0; i < 24; i++)
+                if (BitConverter.ToUInt16(Data, WondercardData + i * WC6.Size) == 0)
+                    for (int j = i + 1; j < 24 - i; j++) // Shift everything down
+                        Array.Copy(Data, WondercardData + j * WC6.Size, Data, WondercardData + (j - 1) * WC6.Size, WC6.Size);
+
+            Edited = true;
+        }
+
         // Writeback Validity
         public string checkChunkFF()
         {
@@ -762,8 +887,8 @@ namespace PKHeX
             for (int i = 0; i < Data.Length / 0x200; i++)
             {
                 if (!FFFF.SequenceEqual(Data.Skip(i * 0x200).Take(0x200))) continue;
-                r = String.Format("0x200 chunk @ 0x{0} is FF'd.", (i * 0x200).ToString("X5"))
-                                    + Environment.NewLine + "Cyber will screw up (as of August 31st 2014)." + Environment.NewLine + Environment.NewLine;
+                r = $"0x200 chunk @ 0x{(i*0x200).ToString("X5")} is FF'd."
+                    + Environment.NewLine + "Cyber will screw up (as of August 31st 2014)." + Environment.NewLine + Environment.NewLine;
 
                 // Check to see if it is in the Pokedex
                 if (i * 0x200 > PokeDex && i * 0x200 < PokeDex + 0x900)
@@ -781,9 +906,7 @@ namespace PKHeX
         public string getBlockInfoString()
         {
             return Blocks.Aggregate("", (current, b) => current +
-                    String.Format("{0}: {1}-{2}, {3}{4}",
-                    b.ID.ToString("00"), b.Offset.ToString("X5"), (b.Offset + b.Length).ToString("X5"), b.Length.ToString("X5"),
-                        Environment.NewLine));
+                $"{b.ID.ToString("00")}: {b.Offset.ToString("X5")}-{(b.Offset + b.Length).ToString("X5")}, {b.Length.ToString("X5")}{Environment.NewLine}");
         }
     }
 }

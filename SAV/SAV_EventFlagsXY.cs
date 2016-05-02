@@ -22,10 +22,10 @@ namespace PKHeX
             nud.Text = "0"; // Prompts an update for flag 0.
             // No Volcanic Ash in X/Y
         }
-        bool setup = true;
-        public CheckBox[] chka;
-        public bool[] flags = new bool[3072];
-        public ushort[] Constants = new ushort[(Main.SAV.EventFlag - Main.SAV.EventConst) / 2];
+        private bool setup = true;
+        private CheckBox[] chka;
+        private readonly bool[] flags = new bool[3072];
+        private readonly ushort[] Constants = new ushort[(Main.SAV.EventFlag - Main.SAV.EventConst) / 2];
         private void B_Cancel_Click(object sender, EventArgs e)
         {
             Close();
@@ -77,7 +77,7 @@ namespace PKHeX
             CB_Stats.Items.Clear();
             for (int i = 0; i < Constants.Length; i += 2)
             {
-                CB_Stats.Items.Add(String.Format("0x{0}", i.ToString("X3")));
+                CB_Stats.Items.Add($"0x{(i/2).ToString("X2")}");
                 Constants[i / 2] = BitConverter.ToUInt16(Main.SAV.Data, Main.SAV.EventConst + i);
             }
             CB_Stats.SelectedIndex = 0;
@@ -132,7 +132,7 @@ namespace PKHeX
 
         private void toggleFlag(object sender, EventArgs e)
         {
-            flags[getFlagNum((CheckBox)(sender))] = ((CheckBox)(sender)).Checked;
+            flags[getFlagNum((CheckBox)sender)] = ((CheckBox)sender).Checked;
             changeCustomFlag(sender, e);
         }
 
@@ -145,8 +145,8 @@ namespace PKHeX
         }
         private void diffSaves()
         {
-            BitArray oldBits = new BitArray(olddata);
-            BitArray newBits = new BitArray(newdata);
+            BitArray oldBits = new BitArray(oldFlags);
+            BitArray newBits = new BitArray(newFlags);
 
             string tbIsSet = "";
             string tbUnSet = "";
@@ -154,15 +154,30 @@ namespace PKHeX
             {
                 if (oldBits[i] == newBits[i]) continue;
                 if (newBits[i])
-                    tbIsSet += (i.ToString("0000") + ",");
+                    tbIsSet += i.ToString("0000") + ",";
                 else
-                    tbUnSet += (i.ToString("0000") + ",");
+                    tbUnSet += i.ToString("0000") + ",";
             }
             TB_IsSet.Text = tbIsSet;
             TB_UnSet.Text = tbUnSet;
+
+            if (DialogResult.Yes != Util.Prompt(MessageBoxButtons.YesNo, "Copy Event Constant diff to clipboard?"))
+                return;
+
+            string r = "";
+            for (int i = 0; i < newConst.Length; i += 2)
+            {
+                ushort oldval = BitConverter.ToUInt16(oldConst, i);
+                ushort newval = BitConverter.ToUInt16(oldConst, i);
+                if (oldval != newval)
+                    r += $"0x{(i/2).ToString("X2")}: {oldval}->{newval}{Environment.NewLine}";
+            }
+            Clipboard.SetText(r);
         }
-        private byte[] olddata = new byte[0x180];
-        private byte[] newdata = new byte[0x180];
+        private byte[] oldFlags = new byte[0x180];
+        private byte[] newFlags = new byte[0x180];
+        private byte[] oldConst = new byte[Main.SAV.EventFlag - Main.SAV.EventConst];
+        private byte[] newConst = new byte[Main.SAV.EventFlag - Main.SAV.EventConst];
         private void openSAV(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -172,28 +187,31 @@ namespace PKHeX
         private void loadSAV(object sender, string path)
         {
             FileInfo fi = new FileInfo(path);
-            byte[] eventflags;
-            if (fi.Length == SAV6.SIZE_XY)
-                eventflags = File.ReadAllBytes(path).Skip(Main.SAV.EventFlag).Take(0x180).ToArray();
-            else if (fi.Name.ToLower().Contains("ram") && fi.Length == 0x70000)
-                eventflags = ram2sav.getMAIN(File.ReadAllBytes(path)).Skip(Main.SAV.EventFlag).Take(0x180).ToArray();
-            else
+            if (fi.Length != SAV6.SIZE_XY)
             {
-                Util.Error("Invalid SAV Size", String.Format("File Size: 0x{1} ({0} bytes)", fi.Length, fi.Length.ToString("X5")), "File Loaded: " + path);
+                Util.Error("Invalid SAV Size", string.Format("File Size: 0x{1} ({0} bytes)", fi.Length, fi.Length.ToString("X5")), "File Loaded: " + path);
                 return;
             }
 
-            Button bs = (Button)sender;
-            if (bs.Name == "B_LoadOld")
-            { Array.Copy(eventflags, olddata, 0x180); TB_OldSAV.Text = path; }
+            byte[] data = File.ReadAllBytes(path);
+            if (sender == B_LoadOld)
+            {
+                oldFlags = data.Skip(Main.SAV.EventFlag).Take(0x180).ToArray();
+                oldConst = data.Skip(Main.SAV.EventConst).Take(Constants.Length * 2).ToArray();
+                TB_OldSAV.Text = path;
+            }
             else
-            { Array.Copy(eventflags, newdata, 0x180); TB_NewSAV.Text = path; }
+            {
+                newFlags = data.Skip(Main.SAV.EventFlag).Take(0x180).ToArray();
+                newConst = data.Skip(Main.SAV.EventConst).Take(Constants.Length * 2).ToArray();
+                TB_NewSAV.Text = path;
+            }
         }
-        int entry = -1;
+        private int entry = -1;
         private void changeConstantIndex(object sender, EventArgs e)
         {
             if (entry > -1) // Set Entry
-                Constants[entry] = (ushort)(Math.Min(Util.ToUInt32(MT_Stat.Text), 0xFFFF));
+                Constants[entry] = (ushort)Math.Min(Util.ToUInt32(MT_Stat.Text), 0xFFFF);
 
             entry = CB_Stats.SelectedIndex; // Get Entry
             MT_Stat.Text = Constants[entry].ToString();
@@ -206,7 +224,7 @@ namespace PKHeX
         private void tabMain_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            loadSAV((Util.Prompt(MessageBoxButtons.YesNo, "FlagDiff Researcher:", "Yes: Old Save" + Environment.NewLine + "No: New Save") == DialogResult.Yes) ? B_LoadOld : B_LoadNew, files[0]);
+            loadSAV(Util.Prompt(MessageBoxButtons.YesNo, "FlagDiff Researcher:", "Yes: Old Save" + Environment.NewLine + "No: New Save") == DialogResult.Yes ? B_LoadOld : B_LoadNew, files[0]);
         }
     }
 }

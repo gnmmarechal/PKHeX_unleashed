@@ -40,17 +40,17 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
@@ -67,10 +67,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Legality\Analysis.cs" />
+    <Compile Include="Legality\Checks.cs" />
+    <Compile Include="Legality\Core.cs" />
+    <Compile Include="Legality\Data.cs" />
     <Compile Include="Misc\PGT.cs" />
     <Compile Include="Misc\PK3.cs" />
     <Compile Include="Misc\PK4.cs" />
-    <Compile Include="Misc\Legal.cs" />
+    <Compile Include="Legality\Tables.cs" />
     <Compile Include="Misc\PGF.cs" />
     <Compile Include="Misc\PK5.cs" />
     <Compile Include="Misc\PK6.cs" />
@@ -81,6 +85,7 @@
     <Compile Include="Misc\QR.Designer.cs">
       <DependentUpon>QR.cs</DependentUpon>
     </Compile>
+    <Compile Include="Misc\SAV5.cs" />
     <Compile Include="Misc\SAV6.cs" />
     <Compile Include="Misc\WC6.cs" />
     <Compile Include="PKX\f2-Text.cs">
@@ -94,12 +99,6 @@
     </Compile>
     <Compile Include="Misc\About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Misc\CodeGenerator.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Misc\CodeGenerator.Designer.cs">
-      <DependentUpon>CodeGenerator.cs</DependentUpon>
     </Compile>
     <Compile Include="Misc\PKX.cs" />
     <Compile Include="PKX\f1-Main.cs">
@@ -120,11 +119,16 @@
     <Compile Include="PKX\f3-MemoryAmie.Designer.cs">
       <DependentUpon>f3-MemoryAmie.cs</DependentUpon>
     </Compile>
-    <Compile Include="Misc\ram2sav.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SAV\SAV_BerryFieldORAS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SAV\SAV_BerryFieldORAS.Designer.cs">
+      <DependentUpon>SAV_BerryFieldORAS.cs</DependentUpon>
     </Compile>
     <Compile Include="SAV\SAV_Database.cs">
       <SubType>Form</SubType>
@@ -158,11 +162,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SAV\SAV_BerryField.cs">
+    <Compile Include="SAV\SAV_BerryFieldXY.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SAV\SAV_BerryField.Designer.cs">
-      <DependentUpon>SAV_BerryField.cs</DependentUpon>
+    <Compile Include="SAV\SAV_BerryFieldXY.Designer.cs">
+      <DependentUpon>SAV_BerryFieldXY.cs</DependentUpon>
     </Compile>
     <Compile Include="SAV\SAV_BoxLayout.cs">
       <SubType>Form</SubType>
@@ -240,9 +244,6 @@
     <EmbeddedResource Include="Misc\About.resx">
       <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Misc\CodeGenerator.resx">
-      <DependentUpon>CodeGenerator.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="PKX\f1-Main.resx">
       <DependentUpon>f1-Main.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -252,6 +253,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PKX\f3-MemoryAmie.resx">
       <DependentUpon>f3-MemoryAmie.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SAV\SAV_BerryFieldORAS.resx">
+      <DependentUpon>SAV_BerryFieldORAS.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SAV\SAV_Database.resx">
       <DependentUpon>SAV_Database.cs</DependentUpon>
@@ -273,8 +277,8 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="SAV\SAV_BerryField.resx">
-      <DependentUpon>SAV_BerryField.cs</DependentUpon>
+    <EmbeddedResource Include="SAV\SAV_BerryFieldXY.resx">
+      <DependentUpon>SAV_BerryFieldXY.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SAV\SAV_BoxLayout.resx">
       <DependentUpon>SAV_BoxLayout.cs</DependentUpon>
@@ -348,6 +352,46 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\byte\dexnav_ao.pkl" />
+    <None Include="Resources\byte\eggmove_ao.pkl" />
+    <None Include="Resources\byte\eggmove_xy.pkl" />
+    <None Include="Resources\byte\encounter_a.pkl" />
+    <None Include="Resources\byte\encounter_ao.pkl" />
+    <None Include="Resources\byte\encounter_o.pkl" />
+    <None Include="Resources\byte\encounter_x.pkl" />
+    <None Include="Resources\byte\encounter_xy.pkl" />
+    <None Include="Resources\byte\encounter_y.pkl" />
+    <None Include="Resources\byte\evos_ao.pkl" />
+    <None Include="Resources\byte\lvlmove_ao.pkl" />
+    <None Include="Resources\byte\lvlmove_xy.pkl" />
+    <None Include="Resources\byte\personal_xy" />
+    <None Include="Resources\byte\wc6.pkl" />
+    <None Include="Resources\byte\wc6full.pkl" />
+    <None Include="Resources\img\warn.png" />
+    <None Include="Resources\img\valid.png" />
+    <Content Include="Resources\text\de\text_Pokeblock_de.txt" />
+    <None Include="Resources\text\de\text_tradeao_de.txt" />
+    <None Include="Resources\text\de\text_tradexy_de.txt" />
+    <Content Include="Resources\text\en\text_Pokeblock_en.txt" />
+    <None Include="Resources\text\en\text_tradeao_en.txt" />
+    <None Include="Resources\text\en\text_tradexy_en.txt" />
+    <Content Include="Resources\text\es\text_Pokeblock_es.txt" />
+    <None Include="Resources\text\es\text_tradeao_es.txt" />
+    <None Include="Resources\text\es\text_tradexy_es.txt" />
+    <Content Include="Resources\text\fr\text_Pokeblock_fr.txt" />
+    <None Include="Resources\text\fr\text_tradeao_fr.txt" />
+    <None Include="Resources\text\fr\text_tradexy_fr.txt" />
+    <Content Include="Resources\text\it\text_Pokeblock_it.txt" />
+    <None Include="Resources\text\it\text_tradeao_it.txt" />
+    <None Include="Resources\text\it\text_tradexy_it.txt" />
+    <Content Include="Resources\text\ja\text_Pokeblock_ja.txt" />
+    <None Include="Resources\text\ja\text_tradeao_ja.txt" />
+    <None Include="Resources\text\ja\text_tradexy_ja.txt" />
+    <Content Include="Resources\text\ko\text_Pokeblock_ko.txt" />
+    <None Include="Resources\text\ko\text_tradeao_ko.txt" />
+    <None Include="Resources\text\ko\text_tradexy_ko.txt" />
+    <Content Include="Resources\text\zh\text_Pokeblock_zh.txt" />
+    <None Include="Resources\text\it\lang_it.txt" />
     <None Include="Resources\img\Pokemon Sprites\414-2.png" />
     <None Include="Resources\img\Pokemon Sprites\414-1.png" />
     <None Include="Resources\img\Trainer Sprites\tr_129.png" />
