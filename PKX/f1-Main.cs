@@ -2877,6 +2877,56 @@ namespace PKHeX
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            TB_HPIV.Text = 31.ToString();
+            TB_ATKIV.Text = 31.ToString();
+            TB_DEFIV.Text = 31.ToString();
+            TB_SPAIV.Text = 31.ToString();
+            TB_SPDIV.Text = 31.ToString();
+            TB_SPEIV.Text = 31.ToString();
+        }
+
+        private void Label_HP_Click(object sender, EventArgs e)
+        {
+            TB_HPIV.Text = 31.ToString();
+        }
+
+        private void Label_ATK_Click(object sender, EventArgs e)
+        {
+            TB_ATKIV.Text = 31.ToString();
+        }
+
+        private void Label_DEF_Click(object sender, EventArgs e)
+        {
+            TB_DEFIV.Text = 31.ToString();
+        }
+
+        private void Label_SPA_Click(object sender, EventArgs e)
+        {
+            TB_SPAIV.Text = 31.ToString();
+        }
+
+        private void Label_SPD_Click(object sender, EventArgs e)
+        {
+            TB_SPDIV.Text = 31.ToString();
+        }
+
+        private void Label_SPE_Click(object sender, EventArgs e)
+        {
+            TB_SPEIV.Text = 31.ToString();
+        }
+
+        private void Label_Total_Click(object sender, EventArgs e)
+        {
+            TB_HPIV.Text = 31.ToString();
+            TB_ATKIV.Text = 31.ToString();
+            TB_DEFIV.Text = 31.ToString();
+            TB_SPAIV.Text = 31.ToString();
+            TB_SPDIV.Text = 31.ToString();
+            TB_SPEIV.Text = 31.ToString();
+        }
+
         // Generic Subfunctions //
         private void setParty()
         {

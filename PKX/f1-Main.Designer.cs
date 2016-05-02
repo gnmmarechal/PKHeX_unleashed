@@ -78,6 +78,7 @@
             this.MT_Level = new System.Windows.Forms.MaskedTextBox();
             this.DEV_Ability = new System.Windows.Forms.ComboBox();
             this.Tab_Met = new System.Windows.Forms.TabPage();
+            this.BUTTON_eggmet = new System.Windows.Forms.Button();
             this.CHK_AsEgg = new System.Windows.Forms.CheckBox();
             this.CHK_Fateful = new System.Windows.Forms.CheckBox();
             this.GB_EggConditions = new System.Windows.Forms.GroupBox();
@@ -98,6 +99,7 @@
             this.CAL_MetDate = new System.Windows.Forms.DateTimePicker();
             this.CB_EncounterType = new System.Windows.Forms.ComboBox();
             this.Tab_Stats = new System.Windows.Forms.TabPage();
+            this.BUTTON_perfectivs = new System.Windows.Forms.Button();
             this.Stat_SPE = new System.Windows.Forms.MaskedTextBox();
             this.Stat_SPD = new System.Windows.Forms.MaskedTextBox();
             this.Stat_SPA = new System.Windows.Forms.MaskedTextBox();
@@ -354,7 +356,6 @@
             this.B_OpenSuperTraining = new System.Windows.Forms.Button();
             this.dragout = new System.Windows.Forms.PictureBox();
             this.L_QR = new System.Windows.Forms.Label();
-            this.BUTTON_eggmet = new System.Windows.Forms.Button();
             this.tabMain.SuspendLayout();
             this.Tab_Main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Label_IsShiny)).BeginInit();
@@ -1045,6 +1046,16 @@
             this.Tab_Met.Text = "Met";
             this.Tab_Met.UseVisualStyleBackColor = true;
             // 
+            // BUTTON_eggmet
+            // 
+            this.BUTTON_eggmet.Location = new System.Drawing.Point(172, 204);
+            this.BUTTON_eggmet.Name = "BUTTON_eggmet";
+            this.BUTTON_eggmet.Size = new System.Drawing.Size(59, 22);
+            this.BUTTON_eggmet.TabIndex = 10;
+            this.BUTTON_eggmet.Text = "Egg Met";
+            this.BUTTON_eggmet.UseVisualStyleBackColor = true;
+            this.BUTTON_eggmet.Click += new System.EventHandler(this.BUTTON_eggmet_Click);
+            // 
             // CHK_AsEgg
             // 
             this.CHK_AsEgg.AutoSize = true;
@@ -1250,6 +1261,7 @@
             // Tab_Stats
             // 
             this.Tab_Stats.AllowDrop = true;
+            this.Tab_Stats.Controls.Add(this.BUTTON_perfectivs);
             this.Tab_Stats.Controls.Add(this.Stat_SPE);
             this.Tab_Stats.Controls.Add(this.Stat_SPD);
             this.Tab_Stats.Controls.Add(this.Stat_SPA);
@@ -1308,6 +1320,16 @@
             this.Tab_Stats.TabIndex = 2;
             this.Tab_Stats.Text = "Stats";
             this.Tab_Stats.UseVisualStyleBackColor = true;
+            // 
+            // BUTTON_perfectivs
+            // 
+            this.BUTTON_perfectivs.Location = new System.Drawing.Point(6, 217);
+            this.BUTTON_perfectivs.Name = "BUTTON_perfectivs";
+            this.BUTTON_perfectivs.Size = new System.Drawing.Size(85, 23);
+            this.BUTTON_perfectivs.TabIndex = 51;
+            this.BUTTON_perfectivs.Text = "Perfect IVs";
+            this.BUTTON_perfectivs.UseVisualStyleBackColor = true;
+            this.BUTTON_perfectivs.Click += new System.EventHandler(this.button1_Click);
             // 
             // Stat_SPE
             // 
@@ -1721,21 +1743,21 @@
             // 
             // BTN_RandomEVs
             // 
-            this.BTN_RandomEVs.Location = new System.Drawing.Point(140, 218);
+            this.BTN_RandomEVs.Location = new System.Drawing.Point(176, 217);
             this.BTN_RandomEVs.Name = "BTN_RandomEVs";
-            this.BTN_RandomEVs.Size = new System.Drawing.Size(92, 23);
+            this.BTN_RandomEVs.Size = new System.Drawing.Size(86, 23);
             this.BTN_RandomEVs.TabIndex = 14;
-            this.BTN_RandomEVs.Text = "Randomize EVs";
+            this.BTN_RandomEVs.Text = "Random EVs";
             this.BTN_RandomEVs.UseVisualStyleBackColor = true;
             this.BTN_RandomEVs.Click += new System.EventHandler(this.updateRandomEVs);
             // 
             // BTN_RandomIVs
             // 
-            this.BTN_RandomIVs.Location = new System.Drawing.Point(41, 218);
+            this.BTN_RandomIVs.Location = new System.Drawing.Point(91, 217);
             this.BTN_RandomIVs.Name = "BTN_RandomIVs";
-            this.BTN_RandomIVs.Size = new System.Drawing.Size(92, 23);
+            this.BTN_RandomIVs.Size = new System.Drawing.Size(85, 23);
             this.BTN_RandomIVs.TabIndex = 13;
-            this.BTN_RandomIVs.Text = "Randomize IVs";
+            this.BTN_RandomIVs.Text = "Random IVs";
             this.BTN_RandomIVs.UseVisualStyleBackColor = true;
             this.BTN_RandomIVs.Click += new System.EventHandler(this.updateRandomIVs);
             // 
@@ -1783,6 +1805,7 @@
             this.Label_Total.TabIndex = 25;
             this.Label_Total.Text = "Total:";
             this.Label_Total.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_Total.Click += new System.EventHandler(this.Label_Total_Click);
             // 
             // Label_SPE
             // 
@@ -1792,6 +1815,7 @@
             this.Label_SPE.TabIndex = 24;
             this.Label_SPE.Text = "Spe:";
             this.Label_SPE.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_SPE.Click += new System.EventHandler(this.Label_SPE_Click);
             this.Label_SPE.MouseDown += new System.Windows.Forms.MouseEventHandler(this.clickStatLabel);
             // 
             // Label_SPD
@@ -1802,6 +1826,7 @@
             this.Label_SPD.TabIndex = 23;
             this.Label_SPD.Text = "SpD:";
             this.Label_SPD.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_SPD.Click += new System.EventHandler(this.Label_SPD_Click);
             this.Label_SPD.MouseDown += new System.Windows.Forms.MouseEventHandler(this.clickStatLabel);
             // 
             // Label_SPA
@@ -1812,6 +1837,7 @@
             this.Label_SPA.TabIndex = 22;
             this.Label_SPA.Text = "SpA:";
             this.Label_SPA.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_SPA.Click += new System.EventHandler(this.Label_SPA_Click);
             this.Label_SPA.MouseDown += new System.Windows.Forms.MouseEventHandler(this.clickStatLabel);
             // 
             // Label_DEF
@@ -1822,6 +1848,7 @@
             this.Label_DEF.TabIndex = 21;
             this.Label_DEF.Text = "Def:";
             this.Label_DEF.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_DEF.Click += new System.EventHandler(this.Label_DEF_Click);
             this.Label_DEF.MouseDown += new System.Windows.Forms.MouseEventHandler(this.clickStatLabel);
             // 
             // Label_ATK
@@ -1832,6 +1859,7 @@
             this.Label_ATK.TabIndex = 20;
             this.Label_ATK.Text = "Atk:";
             this.Label_ATK.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_ATK.Click += new System.EventHandler(this.Label_ATK_Click);
             this.Label_ATK.MouseDown += new System.Windows.Forms.MouseEventHandler(this.clickStatLabel);
             // 
             // Label_HP
@@ -1842,6 +1870,7 @@
             this.Label_HP.TabIndex = 19;
             this.Label_HP.Text = "HP:";
             this.Label_HP.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.Label_HP.Click += new System.EventHandler(this.Label_HP_Click);
             this.Label_HP.MouseDown += new System.Windows.Forms.MouseEventHandler(this.clickStatLabel);
             // 
             // TB_EVTotal
@@ -4269,16 +4298,6 @@
             this.L_QR.Visible = false;
             this.L_QR.Click += new System.EventHandler(this.clickQR);
             // 
-            // BUTTON_eggmet
-            // 
-            this.BUTTON_eggmet.Location = new System.Drawing.Point(172, 204);
-            this.BUTTON_eggmet.Name = "BUTTON_eggmet";
-            this.BUTTON_eggmet.Size = new System.Drawing.Size(59, 22);
-            this.BUTTON_eggmet.TabIndex = 10;
-            this.BUTTON_eggmet.Text = "Egg Met";
-            this.BUTTON_eggmet.UseVisualStyleBackColor = true;
-            this.BUTTON_eggmet.Click += new System.EventHandler(this.BUTTON_eggmet_Click);
-            // 
             // Main
             // 
             this.AllowDrop = true;
@@ -4739,6 +4758,7 @@
         private System.Windows.Forms.ToolStripMenuItem Menu_ExportMAIN;
         private System.Windows.Forms.ToolStripMenuItem Menu_ExportRAMSAV;
         private System.Windows.Forms.Button BUTTON_eggmet;
+        private System.Windows.Forms.Button BUTTON_perfectivs;
     }
 }
 
