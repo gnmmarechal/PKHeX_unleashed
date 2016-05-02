@@ -241,6 +241,7 @@
             this.finishUpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.shinyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nonShinyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.randomOTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_Options = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_Language = new System.Windows.Forms.ToolStripMenuItem();
             this.CB_MainLanguage = new System.Windows.Forms.ToolStripComboBox();
@@ -965,6 +966,7 @@
             this.Label_IsShiny.TabIndex = 62;
             this.Label_IsShiny.TabStop = false;
             this.Label_IsShiny.Visible = false;
+            this.Label_IsShiny.Click += new System.EventHandler(this.Label_IsShiny_Click);
             // 
             // BTN_Shinytize
             // 
@@ -2736,7 +2738,8 @@
             this.Menu_CyberGadget,
             this.Menu_Data,
             this.Menu_Other,
-            this.finishUpToolStripMenuItem});
+            this.finishUpToolStripMenuItem,
+            this.randomOTToolStripMenuItem});
             this.Menu_Tools.Name = "Menu_Tools";
             this.Menu_Tools.Size = new System.Drawing.Size(47, 20);
             this.Menu_Tools.Text = "Tools";
@@ -2889,16 +2892,23 @@
             // shinyToolStripMenuItem
             // 
             this.shinyToolStripMenuItem.Name = "shinyToolStripMenuItem";
-            this.shinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.shinyToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.shinyToolStripMenuItem.Text = "Shiny";
             this.shinyToolStripMenuItem.Click += new System.EventHandler(this.shinyToolStripMenuItem_Click);
             // 
             // nonShinyToolStripMenuItem
             // 
             this.nonShinyToolStripMenuItem.Name = "nonShinyToolStripMenuItem";
-            this.nonShinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.nonShinyToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.nonShinyToolStripMenuItem.Text = "Non-Shiny";
             this.nonShinyToolStripMenuItem.Click += new System.EventHandler(this.nonShinyToolStripMenuItem_Click);
+            // 
+            // randomOTToolStripMenuItem
+            // 
+            this.randomOTToolStripMenuItem.Name = "randomOTToolStripMenuItem";
+            this.randomOTToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.randomOTToolStripMenuItem.Text = "Random OT";
+            this.randomOTToolStripMenuItem.Click += new System.EventHandler(this.randomOTToolStripMenuItem_Click);
             // 
             // Menu_Options
             // 
@@ -4789,6 +4799,7 @@
         private System.Windows.Forms.ToolStripMenuItem finishUpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem shinyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem nonShinyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem randomOTToolStripMenuItem;
     }
 }
 
