@@ -2912,15 +2912,29 @@ namespace PKHeX
             //Reroll encryption constant
             TB_EC.Text = Util.rnd32().ToString("X8");
             //Reroll PID
-            TB_PID.Text = PKX.getRandomPID(Util.getIndex(CB_Species), PKX.getGender(Label_Gender.Text)).ToString("X8");
+            int origin = Util.getIndex(CB_GameOrigin);
+            uint PID = PKX.getRandomPID(Util.getIndex(CB_Species), PKX.getGender(Label_Gender.Text), origin, Util.getIndex(CB_Nature), CB_Form.SelectedIndex);
+            TB_PID.Text = PID.ToString("X8");
             getQuickFiller(dragout);
+            if (origin >= 24)
+                return;
+
+            // Before Gen6, EC and PID are related
+            // Ensure we don't have an illegal newshiny PID.
+            uint SID = Util.ToUInt32(TB_TID.Text);
+            uint TID = Util.ToUInt32(TB_TID.Text);
+            uint XOR = TID ^ SID ^ PID >> 16 ^ PID & 0xFFFF;
+            if (XOR >> 3 == 1) // Illegal
+                updateRandomPID(sender, e); // Get a new PID
+
+            TB_EC.Text = PID.ToString("X8");
         }
 
         private void shinyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             uint PID = Util.getHEXval(TB_PID.Text);
-            uint UID = (PID >> 16);
-            uint LID = (PID & 0xFFFF);
+            uint UID = PID >> 16;
+            uint LID = PID & 0xFFFF;
             uint PSV = UID ^ LID;
             uint TID = Util.ToUInt32(TB_TID.Text);
             uint SID = Util.ToUInt32(TB_SID.Text);
@@ -2931,8 +2945,9 @@ namespace PKHeX
             XOR &= 0xFFFE; XOR |= UID & 1;
 
             // New XOR should be 0 or 1.
-            if (XOR > 16)
-                TB_PID.Text = (((UID ^ XOR) << 16) + LID).ToString("X8");
+            TB_PID.Text = (((UID ^ XOR) << 16) + LID).ToString("X8");
+            if (Util.getIndex(CB_GameOrigin) < 24) // Pre Gen6
+                TB_EC.Text = TB_PID.Text;
 
             setIsShiny();
             getQuickFiller(dragout);
