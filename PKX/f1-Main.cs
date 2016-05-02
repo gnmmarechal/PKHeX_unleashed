@@ -2801,6 +2801,143 @@ namespace PKHeX
                 getQuickFiller(SlotPictureBoxes[i], pk);
             }
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            CB_GameOrigin.Text = "OR";
+            CB_MetLocation.Text = "Route 101";
+            TB_MetLevel.Text = "1";
+            CHK_AsEgg.Checked = true;
+            CB_EggLocation.Text = "Day Care helpers";
+            CAL_MetDate.Value = DateTime.Today;
+            CAL_EggDate.Value = DateTime.Today.AddDays(-1);
+            if (GB_EggConditions.Enabled != true)
+            {
+                GB_EggConditions.Enabled = true;
+            }
+        }
+
+        private void randomOTToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Random rnd = new Random();
+            int tidrnd = rnd.Next(1, 65536);
+            int sidrnd = rnd.Next(1, 65536);
+            if (tidrnd == 0)
+            {
+                TB_TID.Text = "00000";
+                MessageBox.Show("Congratulations! You had a 1/65536 chance of getting this number!");
+
+            }
+            else
+            {
+                if (tidrnd <= 9)
+                {
+                    TB_TID.Text = "0000" + tidrnd.ToString();
+                }
+                else
+                {
+                    if (tidrnd <= 99)
+                    {
+                        TB_TID.Text = "000" + tidrnd.ToString();
+                    }
+                    else
+                    {
+                        if (tidrnd <= 999)
+                        {
+                            TB_TID.Text = "00" + tidrnd.ToString();
+                        }
+                        else
+                        {
+                            if (tidrnd <= 9999)
+                            {
+                                TB_TID.Text = "0" + tidrnd.ToString();
+                            }
+                            else
+                            {
+                                TB_TID.Text = tidrnd.ToString();
+                            }
+                        }
+                    }
+
+                }
+            }
+            if (sidrnd == 0)
+            {
+                TB_SID.Text = "00000";
+                MessageBox.Show("Congratulations! You had a 1/65536 chance of getting this number!");
+            }
+            else
+            {
+                if (sidrnd <= 9)
+                {
+                    TB_SID.Text = "0000" + sidrnd.ToString();
+                }
+                else
+                {
+                    if (sidrnd <= 99)
+                    {
+                        TB_SID.Text = "000" + sidrnd.ToString();
+                    }
+                    else
+                    {
+                        if (sidrnd <= 999)
+                        {
+                            TB_SID.Text = "00" + sidrnd.ToString();
+                        }
+                        else
+                        {
+                            if (sidrnd <= 9999)
+                            {
+                                TB_SID.Text = "0" + sidrnd.ToString();
+                            }
+                            else
+                            {
+                                TB_SID.Text = sidrnd.ToString();
+                            }
+                        }
+                    }
+
+                }
+            }
+            string nameot;
+            int namernd = rnd.Next(0, 47);
+            string[] namech = new string[] {"MonkeyMan", "SuperDuperMan", "Putin", "XtremeGamerz", "Arthur", "Artur", "Melinda", "Bill", "Steve", "Linus", "Mario", "Luigi", "May", "Brendan", "Gold", "Red", "Blue", "Midori", "Green", "Oak", "John", "Smith", "Jesus", "Smeaisagod", "Calvin", "Hobbes", "SuperPoke", "Pokemon", "PokePoke", "Mia", "Nia", "Dude", "Coolguy", "Senpai", "Mary", "Peach", "Window", "Gamerz", "Luv", "Lux", "Lex", "Lix", "Mao", "Miku", "Hatsune", "Ren", "Len" };
+            nameot = namech[namernd];
+            TB_OT.Text = nameot;
+
+        }
+
+        private void nonShinyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Reroll encryption constant
+            TB_EC.Text = Util.rnd32().ToString("X8");
+            //Reroll PID
+            TB_PID.Text = PKX.getRandomPID(Util.getIndex(CB_Species), PKX.getGender(Label_Gender.Text)).ToString("X8");
+            getQuickFiller(dragout);
+        }
+
+        private void shinyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            uint PID = Util.getHEXval(TB_PID.Text);
+            uint UID = (PID >> 16);
+            uint LID = (PID & 0xFFFF);
+            uint PSV = UID ^ LID;
+            uint TID = Util.ToUInt32(TB_TID.Text);
+            uint SID = Util.ToUInt32(TB_SID.Text);
+            uint TSV = TID ^ SID;
+            uint XOR = TSV ^ PSV;
+
+            // Preserve Gen5 Origin Ability bit just in case
+            XOR &= 0xFFFE; XOR |= UID & 1;
+
+            // New XOR should be 0 or 1.
+            if (XOR > 16)
+                TB_PID.Text = (((UID ^ XOR) << 16) + LID).ToString("X8");
+
+            setIsShiny();
+            getQuickFiller(dragout);
+        }
+
         private void clickLegality(object sender, EventArgs e)
         {
             int slot = getSlot(sender);

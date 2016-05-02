@@ -78,6 +78,7 @@
             this.MT_Level = new System.Windows.Forms.MaskedTextBox();
             this.DEV_Ability = new System.Windows.Forms.ComboBox();
             this.Tab_Met = new System.Windows.Forms.TabPage();
+            this.button1 = new System.Windows.Forms.Button();
             this.CHK_AsEgg = new System.Windows.Forms.CheckBox();
             this.CHK_Fateful = new System.Windows.Forms.CheckBox();
             this.GB_EggConditions = new System.Windows.Forms.GroupBox();
@@ -241,6 +242,10 @@
             this.Menu_Other = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_OpenSDF = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_OpenSDB = new System.Windows.Forms.ToolStripMenuItem();
+            this.finishUpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nonShinyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shinyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.randomOTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_Options = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_Language = new System.Windows.Forms.ToolStripMenuItem();
             this.CB_MainLanguage = new System.Windows.Forms.ToolStripComboBox();
@@ -1039,6 +1044,7 @@
             // Tab_Met
             // 
             this.Tab_Met.AllowDrop = true;
+            this.Tab_Met.Controls.Add(this.button1);
             this.Tab_Met.Controls.Add(this.CHK_AsEgg);
             this.Tab_Met.Controls.Add(this.CHK_Fateful);
             this.Tab_Met.Controls.Add(this.GB_EggConditions);
@@ -1061,6 +1067,16 @@
             this.Tab_Met.TabIndex = 1;
             this.Tab_Met.Text = "Met";
             this.Tab_Met.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(167, 200);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(63, 22);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "Met Egg";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // CHK_AsEgg
             // 
@@ -2795,7 +2811,9 @@
             this.Menu_Showdown,
             this.Menu_CyberGadget,
             this.Menu_Data,
-            this.Menu_Other});
+            this.Menu_Other,
+            this.finishUpToolStripMenuItem,
+            this.randomOTToolStripMenuItem});
             this.Menu_Tools.Name = "Menu_Tools";
             this.Menu_Tools.Size = new System.Drawing.Size(47, 20);
             this.Menu_Tools.Text = "Tools";
@@ -2808,27 +2826,27 @@
             this.Menu_ShowdownExportParty,
             this.Menu_ShowdownExportBattleBox});
             this.Menu_Showdown.Name = "Menu_Showdown";
-            this.Menu_Showdown.Size = new System.Drawing.Size(143, 22);
+            this.Menu_Showdown.Size = new System.Drawing.Size(152, 22);
             this.Menu_Showdown.Text = "Showdown";
             // 
             // Menu_ShowdownImportPK6
             // 
             this.Menu_ShowdownImportPK6.Name = "Menu_ShowdownImportPK6";
+            this.Menu_ShowdownImportPK6.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.Menu_ShowdownImportPK6.ShowShortcutKeys = false;
             this.Menu_ShowdownImportPK6.Size = new System.Drawing.Size(231, 22);
             this.Menu_ShowdownImportPK6.Text = "Import Set from Clipboard";
             this.Menu_ShowdownImportPK6.Click += new System.EventHandler(this.clickShowdownImportPK6);
-            this.Menu_ShowdownImportPK6.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.Menu_ShowdownImportPK6.ShowShortcutKeys = false;
             // 
             // Menu_ShowdownExportPK6
             // 
             this.Menu_ShowdownExportPK6.Name = "Menu_ShowdownExportPK6";
+            this.Menu_ShowdownExportPK6.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.T)));
+            this.Menu_ShowdownExportPK6.ShowShortcutKeys = false;
             this.Menu_ShowdownExportPK6.Size = new System.Drawing.Size(231, 22);
             this.Menu_ShowdownExportPK6.Text = "Export Set to Clipboard";
             this.Menu_ShowdownExportPK6.Click += new System.EventHandler(this.clickShowdownExportPK6);
-            this.Menu_ShowdownExportPK6.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-            | System.Windows.Forms.Keys.T)));
-            this.Menu_ShowdownExportPK6.ShowShortcutKeys = false;
             // 
             // Menu_ShowdownExportParty
             // 
@@ -2850,7 +2868,7 @@
             this.Menu_OpenTemp,
             this.Menu_OpenCache});
             this.Menu_CyberGadget.Name = "Menu_CyberGadget";
-            this.Menu_CyberGadget.Size = new System.Drawing.Size(143, 22);
+            this.Menu_CyberGadget.Size = new System.Drawing.Size(152, 22);
             this.Menu_CyberGadget.Text = "CyberGadget";
             // 
             // Menu_OpenTemp
@@ -2875,7 +2893,7 @@
             this.Menu_Report,
             this.Menu_Database});
             this.Menu_Data.Name = "Menu_Data";
-            this.Menu_Data.Size = new System.Drawing.Size(143, 22);
+            this.Menu_Data.Size = new System.Drawing.Size(152, 22);
             this.Menu_Data.Text = "Data";
             // 
             // Menu_LoadBoxes
@@ -2916,7 +2934,7 @@
             this.Menu_OpenSDF,
             this.Menu_OpenSDB});
             this.Menu_Other.Name = "Menu_Other";
-            this.Menu_Other.Size = new System.Drawing.Size(143, 22);
+            this.Menu_Other.Size = new System.Drawing.Size(152, 22);
             this.Menu_Other.Text = "Other";
             // 
             // Menu_OpenSDF
@@ -2932,6 +2950,36 @@
             this.Menu_OpenSDB.Size = new System.Drawing.Size(229, 22);
             this.Menu_OpenSDB.Text = "Open SaveDataBackup Folder";
             this.Menu_OpenSDB.Click += new System.EventHandler(this.clickOpenSDBFolder);
+            // 
+            // finishUpToolStripMenuItem
+            // 
+            this.finishUpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nonShinyToolStripMenuItem,
+            this.shinyToolStripMenuItem});
+            this.finishUpToolStripMenuItem.Name = "finishUpToolStripMenuItem";
+            this.finishUpToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.finishUpToolStripMenuItem.Text = "Finish Up";
+            // 
+            // nonShinyToolStripMenuItem
+            // 
+            this.nonShinyToolStripMenuItem.Name = "nonShinyToolStripMenuItem";
+            this.nonShinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.nonShinyToolStripMenuItem.Text = "Non-Shiny";
+            this.nonShinyToolStripMenuItem.Click += new System.EventHandler(this.nonShinyToolStripMenuItem_Click);
+            // 
+            // shinyToolStripMenuItem
+            // 
+            this.shinyToolStripMenuItem.Name = "shinyToolStripMenuItem";
+            this.shinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.shinyToolStripMenuItem.Text = "Shiny";
+            this.shinyToolStripMenuItem.Click += new System.EventHandler(this.shinyToolStripMenuItem_Click);
+            // 
+            // randomOTToolStripMenuItem
+            // 
+            this.randomOTToolStripMenuItem.Name = "randomOTToolStripMenuItem";
+            this.randomOTToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.randomOTToolStripMenuItem.Text = "Random OT";
+            this.randomOTToolStripMenuItem.Click += new System.EventHandler(this.randomOTToolStripMenuItem_Click);
             // 
             // Menu_Options
             // 
@@ -4411,7 +4459,7 @@
             this.MaximizeBox = false;
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "PKHeX";
+            this.Text = "PKHeX: Unleashed Edition";
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.tabMain_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.tabMain_DragEnter);
             this.tabMain.ResumeLayout(false);
@@ -4870,6 +4918,11 @@
         private System.Windows.Forms.ToolStripMenuItem mnuLLegality;
         private System.Windows.Forms.ToolStripMenuItem mnuLQR;
         private System.Windows.Forms.PictureBox PB_Legal;
+        private System.Windows.Forms.ToolStripMenuItem finishUpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nonShinyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem shinyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem randomOTToolStripMenuItem;
+        private System.Windows.Forms.Button button1;
     }
 }
 
