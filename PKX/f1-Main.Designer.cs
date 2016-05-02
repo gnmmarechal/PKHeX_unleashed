@@ -238,6 +238,9 @@
             this.Menu_Other = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_OpenSDF = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_OpenSDB = new System.Windows.Forms.ToolStripMenuItem();
+            this.finishUpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shinyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nonShinyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_Options = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu_Language = new System.Windows.Forms.ToolStripMenuItem();
             this.CB_MainLanguage = new System.Windows.Forms.ToolStripComboBox();
@@ -2732,7 +2735,8 @@
             this.Menu_Showdown,
             this.Menu_CyberGadget,
             this.Menu_Data,
-            this.Menu_Other});
+            this.Menu_Other,
+            this.finishUpToolStripMenuItem});
             this.Menu_Tools.Name = "Menu_Tools";
             this.Menu_Tools.Size = new System.Drawing.Size(47, 20);
             this.Menu_Tools.Text = "Tools";
@@ -2745,7 +2749,7 @@
             this.Menu_ShowdownExportParty,
             this.Menu_ShowdownExportBattleBox});
             this.Menu_Showdown.Name = "Menu_Showdown";
-            this.Menu_Showdown.Size = new System.Drawing.Size(143, 22);
+            this.Menu_Showdown.Size = new System.Drawing.Size(152, 22);
             this.Menu_Showdown.Text = "Showdown";
             // 
             // Menu_ShowdownImportPK6
@@ -2783,7 +2787,7 @@
             this.Menu_OpenTemp,
             this.Menu_OpenCache});
             this.Menu_CyberGadget.Name = "Menu_CyberGadget";
-            this.Menu_CyberGadget.Size = new System.Drawing.Size(143, 22);
+            this.Menu_CyberGadget.Size = new System.Drawing.Size(152, 22);
             this.Menu_CyberGadget.Text = "CyberGadget";
             // 
             // Menu_CodeGenerator
@@ -2815,7 +2819,7 @@
             this.Menu_Report,
             this.Menu_Database});
             this.Menu_Data.Name = "Menu_Data";
-            this.Menu_Data.Size = new System.Drawing.Size(143, 22);
+            this.Menu_Data.Size = new System.Drawing.Size(152, 22);
             this.Menu_Data.Text = "Data";
             // 
             // Menu_LoadBoxes
@@ -2856,7 +2860,7 @@
             this.Menu_OpenSDF,
             this.Menu_OpenSDB});
             this.Menu_Other.Name = "Menu_Other";
-            this.Menu_Other.Size = new System.Drawing.Size(143, 22);
+            this.Menu_Other.Size = new System.Drawing.Size(152, 22);
             this.Menu_Other.Text = "Other";
             // 
             // Menu_OpenSDF
@@ -2872,6 +2876,29 @@
             this.Menu_OpenSDB.Size = new System.Drawing.Size(229, 22);
             this.Menu_OpenSDB.Text = "Open SaveDataBackup Folder";
             this.Menu_OpenSDB.Click += new System.EventHandler(this.clickOpenSDBFolder);
+            // 
+            // finishUpToolStripMenuItem
+            // 
+            this.finishUpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.shinyToolStripMenuItem,
+            this.nonShinyToolStripMenuItem});
+            this.finishUpToolStripMenuItem.Name = "finishUpToolStripMenuItem";
+            this.finishUpToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.finishUpToolStripMenuItem.Text = "Finish Up";
+            // 
+            // shinyToolStripMenuItem
+            // 
+            this.shinyToolStripMenuItem.Name = "shinyToolStripMenuItem";
+            this.shinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.shinyToolStripMenuItem.Text = "Shiny";
+            this.shinyToolStripMenuItem.Click += new System.EventHandler(this.shinyToolStripMenuItem_Click);
+            // 
+            // nonShinyToolStripMenuItem
+            // 
+            this.nonShinyToolStripMenuItem.Name = "nonShinyToolStripMenuItem";
+            this.nonShinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.nonShinyToolStripMenuItem.Text = "Non-Shiny";
+            this.nonShinyToolStripMenuItem.Click += new System.EventHandler(this.nonShinyToolStripMenuItem_Click);
             // 
             // Menu_Options
             // 
@@ -4759,6 +4786,9 @@
         private System.Windows.Forms.ToolStripMenuItem Menu_ExportRAMSAV;
         private System.Windows.Forms.Button BUTTON_eggmet;
         private System.Windows.Forms.Button BUTTON_perfectivs;
+        private System.Windows.Forms.ToolStripMenuItem finishUpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem shinyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nonShinyToolStripMenuItem;
     }
 }
 

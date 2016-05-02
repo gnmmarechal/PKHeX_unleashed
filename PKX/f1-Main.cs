@@ -2927,6 +2927,40 @@ namespace PKHeX
             TB_SPEIV.Text = 31.ToString();
         }
 
+        private void shinyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Reroll encryption constant
+            TB_EC.Text = Util.rnd32().ToString("X8");
+            //Reroll PID
+            uint PID = Util.getHEXval(TB_PID);
+            uint UID = (PID >> 16);
+            uint LID = (PID & 0xFFFF);
+            uint PSV = UID ^ LID;
+            uint TID = Util.ToUInt32(TB_TID);
+            uint SID = Util.ToUInt32(TB_SID);
+            uint TSV = TID ^ SID;
+            uint XOR = TSV ^ PSV;
+
+            // Preserve Gen5 Origin Ability bit just in case
+            XOR &= 0xFFFE; XOR |= UID & 1;
+
+            // New XOR should be 0 or 1.
+            if (XOR > 16)
+                TB_PID.Text = (((UID ^ XOR) << 16) + LID).ToString("X8");
+
+            setIsShiny();
+            getQuickFiller(dragout);
+        }
+
+        private void nonShinyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Reroll encryption constant
+            TB_EC.Text = Util.rnd32().ToString("X8");
+            //Reroll PID
+            TB_PID.Text = PKX.getRandomPID(Util.getIndex(CB_Species), PKX.getGender(Label_Gender.Text)).ToString("X8");
+            getQuickFiller(dragout);
+        }
+
         // Generic Subfunctions //
         private void setParty()
         {
