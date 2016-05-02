@@ -78,6 +78,7 @@
             this.MT_Level = new System.Windows.Forms.MaskedTextBox();
             this.DEV_Ability = new System.Windows.Forms.ComboBox();
             this.Tab_Met = new System.Windows.Forms.TabPage();
+            this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.CHK_AsEgg = new System.Windows.Forms.CheckBox();
             this.CHK_Fateful = new System.Windows.Forms.CheckBox();
@@ -368,6 +369,8 @@
             this.mnuLQR = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuLSave = new System.Windows.Forms.ToolStripMenuItem();
             this.PB_Legal = new System.Windows.Forms.PictureBox();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.tabMain.SuspendLayout();
             this.Tab_Main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Label_IsShiny)).BeginInit();
@@ -1044,6 +1047,9 @@
             // Tab_Met
             // 
             this.Tab_Met.AllowDrop = true;
+            this.Tab_Met.Controls.Add(this.label1);
+            this.Tab_Met.Controls.Add(this.button3);
+            this.Tab_Met.Controls.Add(this.button2);
             this.Tab_Met.Controls.Add(this.button1);
             this.Tab_Met.Controls.Add(this.CHK_AsEgg);
             this.Tab_Met.Controls.Add(this.CHK_Fateful);
@@ -1067,6 +1073,16 @@
             this.Tab_Met.TabIndex = 1;
             this.Tab_Met.Text = "Met";
             this.Tab_Met.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(105, 161);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(46, 23);
+            this.button2.TabIndex = 11;
+            this.button2.Text = "ORAS";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
@@ -2826,7 +2842,7 @@
             this.Menu_ShowdownExportParty,
             this.Menu_ShowdownExportBattleBox});
             this.Menu_Showdown.Name = "Menu_Showdown";
-            this.Menu_Showdown.Size = new System.Drawing.Size(152, 22);
+            this.Menu_Showdown.Size = new System.Drawing.Size(143, 22);
             this.Menu_Showdown.Text = "Showdown";
             // 
             // Menu_ShowdownImportPK6
@@ -2868,7 +2884,7 @@
             this.Menu_OpenTemp,
             this.Menu_OpenCache});
             this.Menu_CyberGadget.Name = "Menu_CyberGadget";
-            this.Menu_CyberGadget.Size = new System.Drawing.Size(152, 22);
+            this.Menu_CyberGadget.Size = new System.Drawing.Size(143, 22);
             this.Menu_CyberGadget.Text = "CyberGadget";
             // 
             // Menu_OpenTemp
@@ -2893,7 +2909,7 @@
             this.Menu_Report,
             this.Menu_Database});
             this.Menu_Data.Name = "Menu_Data";
-            this.Menu_Data.Size = new System.Drawing.Size(152, 22);
+            this.Menu_Data.Size = new System.Drawing.Size(143, 22);
             this.Menu_Data.Text = "Data";
             // 
             // Menu_LoadBoxes
@@ -2934,7 +2950,7 @@
             this.Menu_OpenSDF,
             this.Menu_OpenSDB});
             this.Menu_Other.Name = "Menu_Other";
-            this.Menu_Other.Size = new System.Drawing.Size(152, 22);
+            this.Menu_Other.Size = new System.Drawing.Size(143, 22);
             this.Menu_Other.Text = "Other";
             // 
             // Menu_OpenSDF
@@ -2957,27 +2973,27 @@
             this.nonShinyToolStripMenuItem,
             this.shinyToolStripMenuItem});
             this.finishUpToolStripMenuItem.Name = "finishUpToolStripMenuItem";
-            this.finishUpToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.finishUpToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.finishUpToolStripMenuItem.Text = "Finish Up";
             // 
             // nonShinyToolStripMenuItem
             // 
             this.nonShinyToolStripMenuItem.Name = "nonShinyToolStripMenuItem";
-            this.nonShinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.nonShinyToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.nonShinyToolStripMenuItem.Text = "Non-Shiny";
             this.nonShinyToolStripMenuItem.Click += new System.EventHandler(this.nonShinyToolStripMenuItem_Click);
             // 
             // shinyToolStripMenuItem
             // 
             this.shinyToolStripMenuItem.Name = "shinyToolStripMenuItem";
-            this.shinyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.shinyToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.shinyToolStripMenuItem.Text = "Shiny";
             this.shinyToolStripMenuItem.Click += new System.EventHandler(this.shinyToolStripMenuItem_Click);
             // 
             // randomOTToolStripMenuItem
             // 
             this.randomOTToolStripMenuItem.Name = "randomOTToolStripMenuItem";
-            this.randomOTToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.randomOTToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.randomOTToolStripMenuItem.Text = "Random OT";
             this.randomOTToolStripMenuItem.Click += new System.EventHandler(this.randomOTToolStripMenuItem_Click);
             // 
@@ -4440,6 +4456,24 @@
             this.PB_Legal.TabStop = false;
             this.PB_Legal.Click += new System.EventHandler(this.clickLegality);
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(182, 161);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(46, 23);
+            this.button3.TabIndex = 12;
+            this.button3.Text = "XY";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(25, 166);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(77, 13);
+            this.label1.TabIndex = 13;
+            this.label1.Text = "Location Fix:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // Main
             // 
             this.AllowDrop = true;
@@ -4923,6 +4957,9 @@
         private System.Windows.Forms.ToolStripMenuItem shinyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem randomOTToolStripMenuItem;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button3;
     }
 }
 

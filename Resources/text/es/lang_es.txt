@@ -13,7 +13,7 @@
 !
 ! -----------------------------------------------------
 - DO NOT CHANGE THIS SECTION. Main Form (PKHeX window) below.
-! Main = PKHeX
+! Main = PKHeX: Edición Soltada
 - Change stuff below this line, not above.
 ---------------------Menu Strip------------------------
 Menu_File = Archivo

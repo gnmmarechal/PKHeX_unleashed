@@ -2953,6 +2953,342 @@ namespace PKHeX
             getQuickFiller(dragout);
         }
 
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string species;
+            species = CB_Species.Text;
+            if (species == "Bulbasaur" || species == "Ivysaur" || species == "Venusaur" || species == "Charmander" || species == "Charmeleon" || species == "Charizard" || species == "Squirtle" || species == "Wartortle" || species == "Blastoise" || species == "Caterpie" || species == "Metapod" || species == "Butterfree" || species == "Weedle" || species == "Pidgeot" || species == "Spearow" || species == "Fearow" || species == "Ekans" || species == "Arbok" || species == "Nidoran♀" || species == "Nidorina" || species == "Nidoqueen" || species == "Nidoran♂" || species == "Nidorino" || species == "Nidoking" || species == "Venonat" || species == "Meowth" || species == "Poliwag" || species == "Poliwhirl" || species == "Poliwrath" || species == "Bellsprout" || species == "Weepinbell" || species == "Victreebel" || species == "Farfetch'd" || species == "Shellder" || species == "Cloyster" || species == "Gastly" || species == "Haunter" || species == "Gengar") //001 002 003 //004 005 006 //007 008 009 //010 011 012 //013 //016 //021 022 //023 024 //029 030 031 //032 033 034 //048 //052 //060 061 062 //069 070 071 //083 //090 091 //092 093 094
+            {
+                MessageBox.Show("Doesn't exist as a wild Pokémon in target game.");
+            }
+            else
+            {
+                if (species == "Drowzee" || species == "Exeggcute" || species == "Exeggutor" || species == "Cubone" || species == "Marowak" || species == "Lickitung" || species == "Kangaskhan" || species == "Mr. Mime" || species == "Scyther") //Second one, cuz the other one was too larger already //096 //102 103 //104 105 //108 //115 //122 //123
+                {
+                    MessageBox.Show("Doesn't exist as a wild Pokémon in target game.");
+                }
+                else
+                {
+                    if (species == "Kakuna" || species == "Beedrill" || species == "Pidgeotto" || species == "Pidgeot") //014 015 //017 018 
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Safari Zone";
+                        TB_MetLevel.Text = "30";
+                    }
+                    if (species == "Rattata") //019
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 117";
+                        TB_MetLevel.Text = "14";
+                    }
+                    if (species == "Raticate") //020
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 118";
+                        TB_MetLevel.Text = "24";
+
+                    }
+                    if (species == "Pikachu" || species == "Raichu") //025 026
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Safari Zone";
+                        TB_MetLevel.Text = "25";
+                    }
+                    if (species == "Sandshrew" || species == "Sandslash") //027 028
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 111";
+                        TB_MetLevel.Text = "20";
+                    }
+                    if (species == "Clefairy" || species == "Clefable" || species == "Jigglypuff" || species == "Wigglytuff") //035 036 //039 040
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 115";
+                        TB_MetLevel.Text = "20";
+                    }
+                    if (species == "Vulpix" || species == "Ninetales") //037 038
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mt. Pyre";
+                        TB_MetLevel.Text = "29";
+                    }
+                    if (species == "Sandshrew" || species == "Sandslash") //027 028
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 111";
+                        TB_MetLevel.Text = "20";
+                    }
+                    if (species == "Zubat") //041
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Granite Cave";
+                        TB_MetLevel.Text = "9";
+                    }
+                    if (species == "Golbat") //042
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Meteor Falls";
+                        TB_MetLevel.Text = "25";
+                    }
+                    if (species == "Oddish") //043
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 110";
+                        TB_MetLevel.Text = "13";
+                    }
+                    if (species == "Gloom" || species == "Vileplume") //044 045
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 119";
+                        TB_MetLevel.Text = "22";
+                    }
+                    if (species == "Paras" || species == "Parasect") //046 047
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Petalburg Woods";
+                        TB_MetLevel.Text = "6";
+                    }
+                    if (species == "Venomoth") //049
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mirage Island";
+                        TB_MetLevel.Text = "36";
+                    }
+                    if (species == "Diglett" || species == "dugtrio") //050 051
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Fiery Path";
+                        TB_MetLevel.Text = "15";
+                    }
+                    if (species == "Persian") //053
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mirage Island";
+                        TB_MetLevel.Text = "36";
+                    }
+                    if (species == "Psyduck" || species == "Golduck") //054 055
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Safari Zone";
+                        TB_MetLevel.Text = "20";
+
+                    }
+                    if (species == "Mankey" || species == "Primape") //056 057 
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Jagged Pass";
+                        TB_MetLevel.Text = "21";
+
+                    }
+                    if (species == "Growlithe" || species == "Arcanine") //058 059
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mt. Pyre";
+                        TB_MetLevel.Text = "31";
+
+                    }
+                    if (species == "Abra" || species == "Kadabra" || species == "Alakazam") //063 064 065
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Granite Cave";
+                        TB_MetLevel.Text = "10";
+
+                    }
+                    if (species == "Machop" || species == "Machoke" || species == "Machamp") //066 067 068
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 112";
+                        TB_MetLevel.Text = "8";
+
+                    }
+                    if (species == "Tentacool" || species == "Tentacruel") //072 073 //Note that Tentacruel can also be found in the wild
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 120";
+                        TB_MetLevel.Text = "5";
+
+                    }
+                    if (species == "Geodude") //074
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Granite Cave";
+                        TB_MetLevel.Text = "10";
+
+                    }
+                    if (species == "Graveler" || species == "Golem") //075 076
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Lilycove City";
+                        TB_MetLevel.Text = "28";
+                    }
+                    if (species == "Ponyta" || species == "Rapidash") //077 078
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 112";
+                        TB_MetLevel.Text = "16";
+
+                    }
+                    if (species == "Slowpoke" || species == "Slowbro") //079 080
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mirage Cave";
+                        TB_MetLevel.Text = "36";
+
+                    }
+                    if (species == "Magnemite" || species == "Magneton") //081 082
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 110";
+                        TB_MetLevel.Text = "6";
+
+                    }
+                    if (species == "Doduo" || species == "Dodrio") //084 085
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Safari Zone";
+                        TB_MetLevel.Text = "15";
+                    }
+                    if (species == "Seel") //086
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 125";
+                        TB_MetLevel.Text = "30";
+                    }
+                    if (species == "Dewgong") //087
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Shoal Cave";
+                        TB_MetLevel.Text = "34";
+                    }
+                    if (species == "Grimer" || species == "Muk") //088 089 //I could have used level 15 for both. I didn't want to.
+                    {
+                        if (CB_GameOrigin.Text == "AS")
+                        {
+                            TB_MetLevel.Text = "14";
+
+                        }
+                        else
+                        {
+                            CB_GameOrigin.Text = "OR";
+                            TB_MetLevel.Text = "15";
+                        }
+                        CB_MetLocation.Text = "Fiery Path";
+                    }
+                    if (species == "Onix") //095
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Granite Cave";
+                        TB_MetLevel.Text = "12";
+                    }
+                    if (species == "Hypno") //097
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 121";
+                        TB_MetLevel.Text = "30";
+                    }
+                    if (species == "Krabby" || species == "Kingler") //098 099
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 105";
+                        TB_MetLevel.Text = "25";
+                    }
+                    if (species == "Voltorb") //100
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 110";
+                        TB_MetLevel.Text = "13";
+
+                    }
+                    if (species == "Electrode") //101
+                    {
+                        if (CB_GameOrigin.Text == "AS")
+                        {
+                            CB_MetLocation.Text = "Team Aqua Hideout";
+                        }
+                        else
+                        {
+                            CB_GameOrigin.Text = "OR";
+                            CB_MetLocation.Text = "Team Magma Hideout";
+                        }
+                        TB_MetLevel.Text = "40";
+                    }
+                    if (species == "Hitmonlee" || species == "Hitmonchan" || species == "Tyrogue") //106 107 236 
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 112";
+                        TB_MetLevel.Text = "16";
+
+                    }
+                    if (species == "Koffing" || species == "Weezing") //109 110
+                    {
+                        if (CB_GameOrigin.Text == "AS")
+                        {
+                            TB_MetLevel.Text = "15";
+
+                        }
+                        else
+                        {
+                            CB_GameOrigin.Text = "OR";
+                            TB_MetLevel.Text = "8";
+                        }
+                        CB_MetLocation.Text = "Fiery Path";
+                    }
+                    if (species == "Rhyhorn" || species == "Rhydon") //111 112
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Safari Zone";
+                        TB_MetLevel.Text = "28";
+                    }
+                    if (species == "Chansey" || species == "Happiny") //113 440
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mirage Forest";
+                        TB_MetLevel.Text = "36";
+                    }
+                    if (species == "Tangela") //114
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Mirage Forest";
+                        TB_MetLevel.Text = "36";
+                    }
+                    if (species == "Horsea" || species == "Seadra") //116 117
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 130";
+                        if (species == "Horsea")
+                        {
+                            TB_MetLevel.Text = "30";
+                        }
+                        else
+                        {
+                            TB_MetLevel.Text = "40";
+                        }
+                    }
+                    if (species == "Goldeen") //118
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Route 102";
+                        TB_MetLevel.Text = "5";
+                    }
+                    if (species == "Seaking") //119
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Safari Zone";
+                        TB_MetLevel.Text = "30";
+                    }
+                    if (species == "Staryu" || species == "Starmie") //120 121
+                    {
+                        CB_GameOrigin.Text = "OR";
+                        CB_MetLocation.Text = "Lilycove City";
+                        TB_MetLevel.Text = "40";
+                    }
+
+                    CAL_MetDate.Value = DateTime.Today;
+
+                }
+            }
+        }
+
         private void clickLegality(object sender, EventArgs e)
         {
             int slot = getSlot(sender);
