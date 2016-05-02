@@ -2851,6 +2851,32 @@ namespace PKHeX
                 SAV.Edited = true;
             }
         }
+
+        private void BUTTON_eggmet_Click(object sender, EventArgs e)
+        {
+            if (CB_GameOrigin.Text != "AS" || CB_GameOrigin.Text != "OS" || CB_GameOrigin.Text != "X" || CB_GameOrigin.Text != "Y")
+            {
+                CB_GameOrigin.Text = "OR";
+            }
+            if (CB_GameOrigin.Text == "OS" || CB_GameOrigin.Text == "AS")
+            {
+                CB_MetLocation.Text = "Route 101";
+            }
+            if (CB_GameOrigin.Text == "X" || CB_GameOrigin.Text == "Y")
+            {
+                CB_MetLocation.Text = "Lumiose City";
+            }
+            TB_MetLevel.Text = "1";
+            CHK_AsEgg.Checked = true;
+            CB_EggLocation.Text = "Day Care helpers";
+            CAL_MetDate.Value = DateTime.Today;
+            CAL_EggDate.Value = DateTime.Today.AddDays(-1);
+            if (GB_EggConditions.Enabled != true)
+            {
+                GB_EggConditions.Enabled = true;
+            }
+        }
+
         // Generic Subfunctions //
         private void setParty()
         {

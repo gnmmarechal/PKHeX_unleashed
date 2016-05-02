@@ -13,7 +13,7 @@
 !
 ! -----------------------------------------------------
 - DO NOT CHANGE THIS SECTION. Main Form (PKHeX window) below.
-! Main = PKHeX
+! Main = PKHeX: Unleashed Edition
 - Change stuff below this line, not above.
 ---------------------Menu Strip------------------------
 Menu_File = File
@@ -51,7 +51,7 @@ Menu_Modify = Set to SAV
 Menu_ModifyDex = Modify Pokédex
 Menu_ModifyPK6 = Modify PK6 Info
 Menu_Unicode = Toggle Font
-Menu_About = About PKHeX
+Menu_About = About PKHeX: Unleashed Edition
 --------------------Main Tab Data----------------------
 Tab_Main = Main
 Label_PID = PID:
